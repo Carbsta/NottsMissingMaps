@@ -26,7 +26,7 @@ We are busy in the process of building this blog space and are looking forward t
 
 ## Our Workflow:
 We are producing this app in an agile way using the kaban methodology, we have a [trello board](http://bit.ly/2yU7jBK "Our Trello") where you can see tasks as they move through the development pipeline as well as using the [feature-branch git workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow "Atlassian feature branch workflow tutorial").
-Our Master branch corresponds to stable releases and code, so currently looks a little bare, but we have various development branches were features are being developed before being merged once done, tested and reviewed through pull requests.
+Our Master branch corresponds to stable releases and code, so currently looks a little bare, but we have various development branches where features are being developed before being merged once they are done, tested and reviewed through pull requests.
 
 ## Also See:
 - Our Trello board: http://bit.ly/2yU7jBK
