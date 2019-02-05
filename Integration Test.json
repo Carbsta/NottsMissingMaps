@@ -1,0 +1,109 @@
+[
+    {
+        "id": "a65896c6.4e9bb8",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "fdb13978.870648",
+        "type": "http in",
+        "z": "a65896c6.4e9bb8",
+        "name": "",
+        "url": "/test",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 80,
+        "y": 420,
+        "wires": [
+            [
+                "36bb682.ce89998"
+            ]
+        ]
+    },
+    {
+        "id": "f7c5420b.d91f3",
+        "type": "template",
+        "z": "a65896c6.4e9bb8",
+        "name": "CSS",
+        "field": "payload.style",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "body { \n  max-height: 100vh;\n  margin: 0;\n  overflow: hidden;\n}\n#app, .page-container, .md-app {\n  max-height: inherit;\n}\n\n.md-app-container {\n  display: flex;\n  flex-direction: column;\n}\n.md-app-scroller {\n  max-height: calc(100% - 64px) ;\n  border-width: 2px;\n  border-color: red;\n}\n#title {\n  margin-top: 10px;\n  margin-bottom: 20px;\n}\n\n.md-layout.md-gutter {\n  margin: 0;\n}\n#upload-area {\n  padding: 0;\n}\n\n.md-app-content .md-card {\n  display: inline-block;\n  vertical-align: top;\n  overflow-wrap: break-word;\n  margin: 5px 0 0 0;\n  padding: 12px;\n}\n\n#image-list {\n  min-height: 500px;\n  max-height: calc(100vh - 170px);\n  padding: 0 0 5px 0;\n  margin: 0;\n  overflow: auto;\n}\n\n\n\n.box {\n  background-color: var(--md-theme-default-accent);\n  position: relative;\n  outline: 2px dashed black;\n  outline-offset: -10px;\n  text-align: center;\n  padding: 200px 20px;\n  transition: outline-offset .15s ease-in-out, background-color .15s linear;\n}\n\n.box__dragndrop {\n  display: inline;\n}\n.is-dragover {\n  opacity: 0.7;\n  outline-offset: -20px;\n}\n.box__file {\n  display: none;\n}\n.box label {\n  cursor: pointer;\n}\n",
+        "x": 390,
+        "y": 420,
+        "wires": [
+            [
+                "ef26e145.0199c"
+            ]
+        ]
+    },
+    {
+        "id": "572a8775.dffc68",
+        "type": "http response",
+        "z": "a65896c6.4e9bb8",
+        "name": "",
+        "x": 650,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "ef26e145.0199c",
+        "type": "template",
+        "z": "a65896c6.4e9bb8",
+        "name": "HTML",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta content=\"width=device-width,initial-scale=1,minimal-ui\" name=\"viewport\">\n  <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons\">\n  <link rel=\"stylesheet\" href=\"https://unpkg.com/vue-material@beta/dist/vue-material.min.css\">\n  <link rel=\"stylesheet\" href=\"https://unpkg.com/vue-material@beta/dist/theme/default.css\">\n  <style>{{{payload.style}}}</style>   \n  <title>Missing Map</title>\n</head>\n\n<body>\n  <div id=\"app\">\n    <div class=\"page-container\">\n      <md-app>\n        <md-app-toolbar class=\"md-primary\">\n          <span class=\"md-title\">Missing Map</span>\n        </md-app-toolbar>\n        <md-app-content>\n\n          <div id=\"title\" class=\"md-headline\">{{title}}</div>\n          <div id=\"content\" class=\"md-layout md-gutter md-alignment-top-space-between\">\n            <div id=\"upload-area\" class=\"md-layout-item md-size-45 md-elevation-2\">\n              \n              <form class=\"box\" onsubmit=\"return false\">\n                <div class=\"box__input\">\n                  <input class=\"box__file\" type=\"file\" name=\"files[]\" id=\"file\" data-multiple-caption=\"{count} files selected\" multiple />\n                  <label for=\"file\" class=\"md-headline\"><strong>Choose a file</strong><span class=\"box__dragndrop\"> or drag it here</span>.</label>\n                </div>\n              </form>\n            </div>\n\n            <div id=\"image-list\" class=\"md-layout-item md-size-50 md-elevation-1 md-scrollbar md-theme-default\n            md-layout md-gutter md-alignment-top-space-around\">\n              <md-card v-for=\"card in cards\" :key=\"card.id\" \n              class=\"md-elevation-2 md-layout-item md-size-45\" md-with-hover>\n                <md-card-media>\n                  <img v-bind:src=\"card.image_url\" v-bind:alt=\"'Image: ' + card.image_file_name\">\n                <md-card-media>\n                <md-card-header>\n                  <div class=\"md-title\">{{card.image_file_name}}</div>\n                </md-card-header>\n                <md-card-content>\n                  {{card.image_file_size}}\n                </md-card-content>\n                <md-card-actions>\n                  <md-button class=\"md-accent\" v-on:click=\"dismissFile(card.id)\" >Dismiss</md-button>\n                </md-card-actions>\n              </md-card>\n            </div>\n          </div>\n        </md-app-content>\n      </md-app>\n      <md-button class=\"md-fab md-plain md-fab-bottom-left\" href=\"result.html\">\n        <md-icon>cloud_upload</md-icon>\n      </md-button>\n    </div>\n  </div>\n  <script\n    src=\"https://code.jquery.com/jquery-3.3.1.min.js\"\n    integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\"\n    crossorigin=\"anonymous\"></script>\n  <script src=\"https://unpkg.com/vue\"></script>\n  <script src=\"https://unpkg.com/vue-material@beta\"></script>\n</body>\n</html>\n<script>{{{payload.script}}}</script>\n<script>{{{payload.script2}}}</script>",
+        "x": 510,
+        "y": 420,
+        "wires": [
+            [
+                "572a8775.dffc68"
+            ]
+        ]
+    },
+    {
+        "id": "36bb682.ce89998",
+        "type": "template",
+        "z": "a65896c6.4e9bb8",
+        "name": "Javascript",
+        "field": "payload.script",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Vue.use(VueMaterial.default)\nkey = \"AkOxVVCiK3eLn7_RNH-yWJj56N2xXv1m_I-sCYrG5fIgney_5JLLHr99OHsfUgyP\"\nlet id = 0\nlet app = new Vue({\n    el: '#app',\n    data: {\n        title: 'Upload image/folder...',\n        files: [],\n    },\n    computed: {\n        cards: function(){return this.files.map(toCardData)},\n    },\n    methods: {\n        dismissFile: function (fileId) {\n            for (var i = this.files.length - 1; i >= 0; i--) {\n                if (this.files[i].id == fileId) {\n                    this.files.splice(i, 1);\n                    break;\n                }\n            }\n            console.log(this.files)\n        },\n    },\n})\n\n// called by file uploader\nfunction addFiles(files) {\n    files.forEach(file => {\n        app.files.push({id: id, file: file})\n        id ++\n    })\n    console.log(app.files)\n}\n\nfunction toCardData(file) {\n    let src = window.URL.createObjectURL(file.file)\n    let imagedata = {}\n    return {\n        id: file.id,\n        image_file_name: file.file.name,\n        image_url: src,\n        image_file_size: biteToString(file.file.size),\n    }\n}\n\nfunction biteToString(biteNum) {\n    let kb = biteNum / 1024\n    if (kb < 100) {\n        return kb.toFixed(2) + \" KB\"\n    } else {\n        let mb = kb / 1024\n        return mb.toFixed(2) + \" MB\"\n    }\n}\n",
+        "output": "str",
+        "x": 200,
+        "y": 340,
+        "wires": [
+            [
+                "a6bb0304.15eba"
+            ]
+        ]
+    },
+    {
+        "id": "a6bb0304.15eba",
+        "type": "template",
+        "z": "a65896c6.4e9bb8",
+        "name": "Javascript 2",
+        "field": "payload.script2",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "(function ( document, window, index ){\n\n  // applying the effect for every form\n  let forms = document.querySelectorAll( '.box' );\n  Array.prototype.forEach.call( forms, form => {\n    let input = form.querySelector( 'input[type=\"file\"]' )\n    let label = form.querySelector( 'label' )\n    let errorMsg = form.querySelector( '.box__error span' )\n    let droppedFiles = null\n    let triggerFormSubmit = () => {\n      let files = [...input.files]\n      let filtered = files.filter(file => file.type.split(\"/\")[0] == 'image')\n      let invalidFile = files.length - filtered.length\n      if (invalidFile) alert(invalidFile + \" of \" + files.length + \" file(s) are invalid and ignored!\");\n      addFiles(filtered);\n\n      // TODO: add ajax\n\n    } \n\n    // automatically submit the form on file select\n    input.addEventListener( 'change', e => {\n      triggerFormSubmit()\n    });\n\n    // drag&drop files if the feature is available\n    form.classList.add( 'has-advanced-upload' ); // letting the CSS part to know drag&drop is supported by the browser\n\n    [ 'drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop' ]\n    .forEach( eventName => {\n      form.addEventListener( eventName, e => {\n        // preventing the unwanted behaviours\n        e.preventDefault();\n        e.stopPropagation();\n      });\n    });\n\n    form.addEventListener( \"dragover\", e => form.classList.add( 'is-dragover' ));\n\n    [ 'dragleave', 'dragend', 'drop' ].forEach( eventName => {\n      form.addEventListener( eventName, e => form.classList.remove( 'is-dragover' ))\n    });\n\n    form.addEventListener( 'drop', e => input.files = e.dataTransfer.files );\n\n    // if the form was submitted\n    form.addEventListener( 'submit', function( e ){\n      // preventing the duplicate submissions if the current one is in progress\n      if( form.classList.contains( 'is-uploading' ) ) return false;\n\n      form.classList.add( 'is-uploading' );\n      form.classList.remove( 'is-error' );\n\n      e.preventDefault();\n      e.stopPropagation();\n\n\n      // gathering the form data\n      // let ajaxData = new FormData( form );\n      // Array.prototype.forEach.call( droppedFiles, function( file )\n      // {\n      //   ajaxData.append( input.getAttribute( 'name' ), file );\n      // });\n\n      // // ajax request\n      // let ajax = new XMLHttpRequest();\n      // ajax.open( form.getAttribute( 'method' ), form.getAttribute( 'action' ), true );\n\n      // ajax.onload = function()\n      // {\n      //   form.classList.remove( 'is-uploading' );\n      //   if( ajax.status >= 200 && ajax.status < 400 )\n      //   {\n      //     let data = JSON.parse( ajax.responseText );\n      //     form.classList.add( data.success == true ? 'is-success' : 'is-error' );\n      //     if( !data.success ) errorMsg.textContent = data.error;\n      //   }\n      //   else alert( 'Error. Please, contact the webmaster!' );\n      // };\n\n      // ajax.onerror = function()\n      // {\n      //   form.classList.remove( 'is-uploading' );\n      //   alert( 'Error. Please, try again!' );\n      // };\n\n      // ajax.send( ajaxData );\n\n\n    });\n\n    // Firefox focus bug fix for file input\n    input.addEventListener( 'focus', function(){ input.classList.add( 'has-focus' ); });\n    input.addEventListener( 'blur', function(){ input.classList.remove( 'has-focus' ); });\n\n  });\n})( document, window, 0 );",
+        "output": "str",
+        "x": 250,
+        "y": 480,
+        "wires": [
+            [
+                "f7c5420b.d91f3"
+            ]
+        ]
+    }
+]
