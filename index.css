@@ -1,0 +1,72 @@
+body { 
+  max-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+#app, .page-container, .md-app {
+  max-height: inherit;
+}
+
+.md-app-container {
+  display: flex;
+  flex-direction: column;
+}
+.md-app-scroller {
+  max-height: calc(100% - 64px) ;
+  border-width: 2px;
+  border-color: red;
+}
+#title {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.md-layout.md-gutter {
+  margin: 0;
+}
+#upload-area {
+  padding: 0;
+}
+
+.md-app-content .md-card {
+  display: inline-block;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  margin: 5px 0 0 0;
+  padding: 12px;
+}
+
+#image-list {
+  min-height: 500px;
+  max-height: calc(100vh - 170px);
+  padding: 0 0 5px 0;
+  margin: 0;
+  overflow: auto;
+}
+
+
+
+.box {
+  background-color: var(--md-theme-default-accent);
+  position: relative;
+  outline: 2px dashed black;
+  outline-offset: -10px;
+  text-align: center;
+  padding: 200px 20px;
+  transition: outline-offset .15s ease-in-out, background-color .15s linear;
+}
+
+.box__dragndrop {
+  display: inline;
+}
+.is-dragover {
+  opacity: 0.7;
+  outline-offset: -20px;
+}
+.box__file {
+  display: none;
+}
+.box label {
+  cursor: pointer;
+}
+
