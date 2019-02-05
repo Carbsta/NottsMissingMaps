@@ -8,17 +8,18 @@ To produce a web app that takes arial photography and produces traces that show 
 
 ## The Tools:
 This project is being put together with the help of IBM Watson, by training an image classifier to help identify habitation. Buildings, roads etc.
-The web app will be powered by vue.js to produce a responsive and slick user experience and we will provide more information about the back-end here as and when these features get added.
+The back end of the app is developed using NodeRed which allows us to build scripts that use IBM cloud tools and include them in our website as node.js files. https://nodered.org/
+The front end of the website is powered by Vue.js and CSS to provide a slick UX.
 
 ## Our Team:
 We are a group of students from the University of Nottingham, currently studying in the UK but including representatives from the University's Ningbo campus in China. We each bring our own talents to the team, and our agile kaban process lets us take on tasks to suit our skills and as they become available, but we also take on our own responsibilities within the team:
 
 - [Tom Dudley](https://github.com/Carbsta), team leader and git-master.
-- [Yi Ding](https://github.com/DDEle), team admin.
-- [James Abbott](https://github.com/psyja4), lead front-end dev.
-- [Peter Hare](https://github.com/pete234), lead data scientist.
-- [Sen Lin](https://github.com/SenLin0710), data scientist and developer.
-- [Luke Ellis](https://github.com/Luke551), blog-master and front-end dev.
+- [Yi Ding](https://github.com/DDEle), team admin and lead front-end developer.
+- [James Abbott](https://github.com/psyja4), lead node-red developer.
+- [Peter Hare](https://github.com/pete234), node-red and image classification.
+- [Sen Lin](https://github.com/SenLin0710), front end developer and style sheet maintainer.
+- [Luke Ellis](https://github.com/Luke551), blog-master, front-end dev and data-set researcher.
 
 ## Our Blog (coming soon):
 As part of our work with IBM we are writing about our experience developing this webapp, and delivering that experience through blog posts written by all of us.
