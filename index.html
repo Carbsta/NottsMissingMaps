@@ -1,69 +1,336 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width,initial-scale=1,minimal-ui" name="viewport">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons">
-  <link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/vue-material.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/vue-material@beta/dist/theme/default.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <link rel="stylesheet" href="index.css">
-  <title>Missing Map</title>
 </head>
-
 <body>
   <div id="app">
-    <div class="page-container">
-      <md-app>
-        <md-app-toolbar class="md-primary">
-          <span class="md-title">Missing Map</span>
-        </md-app-toolbar>
-        <md-app-content>
+    <v-app>
+      <v-content>
+        <v-layout row wrap>
 
-          <div id="title" class="md-headline">{{title}}</div>
-          <div id="content" class="md-layout md-gutter md-alignment-top-space-between">
-            <div id="upload-area" class="md-layout-item md-size-45 md-elevation-2">
-              
-              <form class="box" onsubmit="return false">
-                <div class="box__input">
-                  <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
-                  <label for="file" class="md-headline"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
-                </div>
-              </form>
-            </div>
+          <!-- The top tool bar -->
+          <v-card>
+            <v-toolbar fixed>
+              <v-btn icon v-on:click="goHome()">
+                <v-icon>home</v-icon>
+              </v-btn>
+              <v-toolbar-title>Missing Map</v-toolbar-title>
+            </v-toolbar>
+          </v-card>
 
-            <div id="image-list" class="md-layout-item md-size-50 md-elevation-1 md-scrollbar md-theme-default
-            md-layout md-gutter md-alignment-top-space-around">
-              <md-card v-for="card in cards" :key="card.id" 
-              class="md-elevation-2 md-layout-item md-size-45" md-with-hover>
-                <md-card-media>
-                  <img v-bind:src="card.image_url" v-bind:alt="'Image: ' + card.image_file_name">
-                <md-card-media>
-                <md-card-header>
-                  <div class="md-title">{{card.image_file_name}}</div>
-                </md-card-header>
-                <md-card-content>
-                  {{card.image_file_size}}
-                </md-card-content>
-                <md-card-actions>
-                  <md-button class="md-accent" v-on:click="dismissFile(card.id)" >Dismiss</md-button>
-                </md-card-actions>
-              </md-card>
-            </div>
-          </div>
-        </md-app-content>
-      </md-app>
-      <md-button class="md-fab md-plain md-fab-bottom-left" href="result.html">
-        <md-icon>cloud_upload</md-icon>
-      </md-button>
-    </div>
+          <v-flex xs12>  <!-- take the space of the floatting toolbar -->
+            <div style="height: 70px"> </div>
+          </v-flex>
+
+          <!-- uploading page content -->
+          <template v-if="uploadingPage">
+            <!-- drag drop box -->
+            <v-flex xs6>
+              <v-flex>
+                <drag-drop-box :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
+              </v-flex>
+
+              <!-- Alert window -->
+              <v-flex>
+                <v-toolbar flat fixed class="transparent" style="left: 230px">
+                  <v-alert
+                    dismissible
+                    v-model="alert"
+                    type="error"
+                    icon="new_releases"
+                    transition="scale-transition"
+                  >
+                    {(alertMsg)}
+                  </v-alert>
+                </v-toolbar>
+              </v-flex>
+
+              <!-- Bottom submit button -->
+              <v-flex>
+                <v-btn
+                  class="text-none"
+                  color="primary"
+                  fixed style="margin:2%; bottom:0px; left:0px"
+                  v-on:click="submitImg"
+                >
+                  Submit
+                </v-btn>
+              </v-flex>
+            </v-flex>
+
+            <!-- Right part -->
+            <v-flex xs6>
+              <v-container fluid grid-list-xl>
+                <v-layout row wrap>
+                  <v-flex d-flex xs6 v-for="file in imgs">
+                    <img-card upload :file="file" :files="imgs"/>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-flex>
+          </template>
+
+          <!-- report page content -->
+          <template v-else>
+            <v-container fluid grid-list-xl>
+              <v-toolbar floatting flat style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto" class="transparent">
+                <v-btn color="info" v-on:click="expend_all(true)">
+                  <v-icon>unfold_more</v-icon>
+                  Expend All
+                </v-btn>
+                <v-btn color="info" v-on:click="expend_all(false)">
+                  <v-icon>unfold_less</v-icon>
+                  Collapse All
+                </v-btn>
+                <v-btn color="info">
+                  <v-icon>arrow_downward</v-icon>
+                  Download All
+                </v-btn>
+              </v-toolbar>
+              <v-layout row wrap>
+                <v-flex d-flex xs4 v-for="file in imgs">
+                  <img-card ref="report_card" :file="file" :files="imgs"/>
+                </v-flex>
+              </v-layout>
+            </v-container>
+
+
+          </template>
+        </v-layout>
+      </v-content>
+    </v-app>
   </div>
-  <script
-    src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-    crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/vue"></script>
-  <script src="https://unpkg.com/vue-material@beta"></script>
-  <script src="index.js"></script>
-  <script src="index-dragAndDrop.js"></script>
+
+  <script src="https://vuejs.org/js/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+  <script>
+
+
+    /////////////////////////////////
+    // The Drag Drop Box Component //
+    /////////////////////////////////
+    // reference: https://serversideup.net/drag-and-drop-file-uploads-with-vuejs-and-axios/
+    Vue.component('drag-drop-box', {
+      delimiters: ['{(', ')}'],
+      props: {files: Array, alert: Function},
+      data: function () {
+        return {
+          dragAndDropCapable: false,
+        }
+      },
+      mounted: function() {
+        Vue.use(Vuetify, { options: { customProperties: true } })
+
+        var div = document.createElement('div');
+
+        this.dragAndDropCapable = ( ( 'draggable' in div )
+          || ( 'ondragstart' in div && 'ondrop' in div ) )
+          && 'FormData' in window
+          && 'FileReader' in window;
+
+        console.log("dragAndDropCapable is " + this.dragAndDropCapable);
+
+        let fileInput = this.$refs.fileform.querySelector( 'input[type="file"]' )
+        fileInput.addEventListener( 'change', function(e) {
+          this.addFiles(fileInput.files)
+          this.$refs.fileform.reset()
+        }.bind(this))
+
+        if (this.dragAndDropCapable) {
+          ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach( function( evt ) {
+            this.$refs.fileform.addEventListener(evt, function(e){
+              e.preventDefault();
+              e.stopPropagation();
+            }.bind(this), false);
+          }.bind(this));
+
+          this.$refs.fileform.addEventListener('drop', function(e){
+            this.addFiles(e.dataTransfer.files)
+          }.bind(this));
+
+          dragoverClasses = ["is-dragover",,]
+          // drag over
+          this.$refs.fileform.addEventListener('dragover', function(e){
+            dragoverClasses.forEach(className =>
+              this.$refs.fileform.classList.add( className )
+            )
+          }.bind(this));
+
+          // leave
+          [ 'dragend', 'dragleave', 'drop'].forEach( function( evt ) {
+            this.$refs.fileform.addEventListener(evt, function(e){
+              dragoverClasses.forEach(className =>
+                this.$refs.fileform.classList.remove( className )
+              )
+            }.bind(this), false);
+          }.bind(this));
+        }
+
+      },
+      methods: {
+        dismissFile: function(fileName) { return },
+        addFiles: function(files) {
+          let fileArr = this.files;
+          files = [...files];
+          let filtered = files.filter(file => file.type.split("/")[0] == 'image')
+          let invalidFile = files.length - filtered.length;
+          if (invalidFile)
+            this.alert(invalidFile + " of " + files.length + " file(s) are invalid and ignored!");
+          filtered.forEach(file => fileArr.push(file))
+        }
+      },
+      template: `
+        <form ref="fileform" style="height:500px;" :class="'box mt-auto align-center d-flex grey lighten-4 elevation-3'">
+          <div class="box__input" style="align-item: center">
+            <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
+            <label for="file" class="md-headline" style="display: inline">
+              <strong>Choose a file <i class="material-icons" style="display:inline; vertical-align: bottom">folder</i></strong>
+              <span class="box__dragndrop"> or drag it here</span>.
+            </label>
+          </div>
+        </form>
+      `
+    })
+
+    //////////////////////////////
+    // The Image Card Component //
+    //////////////////////////////
+    Vue.component('img-card', {
+      delimiters: ['{(', ')}'],
+      props: {upload: Boolean, file: File, files: Array},
+      data: function () {
+        return {
+          show: false,
+          data: "hello vue",
+        }
+      },
+      methods:{
+        dismiss: function() {
+          for (let i = 0; i < this.files.length; i++) {
+            if (this.files[i] === this.file) {
+              this.files.splice(i, 1)
+            }
+          }
+        },
+        download: function() {
+          let link = document.createElement("a");
+          link.download = this.file.name;
+          link.href = this.imgUrl;
+          link.click();
+        }
+      },
+      computed: {
+        fileSize: function() {
+            let kb = this.file.size / 1024
+            if (kb < 100) {
+                return kb.toFixed(2) + " KB"
+            } else {
+                let mb = kb / 1024
+                return mb.toFixed(2) + " MB"
+            }
+        },
+        imgUrl: function () {
+          return window.URL.createObjectURL(this.file)
+        },
+        reportInfo: function() {
+          return [
+            `Here should be the report details. Some random stuff here now`,
+            `Name: ${this.file.name}`,
+            `LastModifiedDate: ${this.file.lastModifiedDate}`,
+            `Type: ${this.file.type}\n`,
+          ];
+        }
+      },
+
+      template: `
+         <v-layout>
+          <v-flex>
+            <v-card>
+              <v-card-title primary-title>
+                <v-flex xs6>
+                  <v-img :src="imgUrl"></v-img>
+                </v-flex>
+                <v-spacer />
+                <div>
+                  <h3 class="headline mb-0" >{(file.name)}</h3>
+                  <div>{(upload ? this.fileSize : this.fileSize)}</div>
+                </div>
+              </v-card-title>
+
+
+              <v-card-actions>
+                <v-btn v-if="!upload" flat color="primary" v-on:click="download()">
+                  Download
+                </v-btn>
+                <v-spacer />
+                <v-btn v-if="upload" flat color="primary" v-on:click="dismiss()">
+                  dismiss
+                </v-btn>
+                <v-btn v-else flat color="primary" @click = "show = !show">
+                  {(show ? "Collapse" : "Details")}
+                </v-btn>
+              </v-card-actions>
+              <v-slide-y-transition>
+                <v-card-text v-show = "show">
+                  <div v-for="line in reportInfo">{(line)}</div>
+                </v-card-text>
+              </v-slide-y-transition>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      `
+    })
+
+    ///////////////////////////
+    // The main Vue Instance //
+    ///////////////////////////
+    new Vue({
+      el: '#app',
+      delimiters: ['{(', ')}'],
+      data: {
+        uploadingPage: true,
+        imgs: [],
+        alert: false,
+        alertMsg: "",
+      },
+      methods: {
+        submitImg: function (event) {
+          if (this.imgs.length) {
+            this.uploadingPage = false;
+            // TODO: the real uploading things
+          } else {
+            this.raiseAlert("No images to submit");
+          }
+        },
+        raiseAlert: function (msg) {
+          if (!this.alert) {
+            this.alert = true;
+            this.alertMsg = msg;
+          } else {
+            this.alert = false;
+            setTimeout(function() {
+              this.alert = true;
+              this.alertMsg = msg;
+            }.bind(this), 100)
+          }
+        },
+        goHome: function() {
+          this.uploadingPage = true
+          this.imgs = []
+        },
+        expend_all: function (expend) {
+          [...this.$refs.report_card].forEach(function(child) {child.show = expend})
+        }
+      },
+      computed:{
+        cardsData: function() {return {}} // TODO
+      }
+    })
+
+  </script>
 </body>
 </html>
