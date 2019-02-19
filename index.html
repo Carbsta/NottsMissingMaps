@@ -56,6 +56,7 @@
                   color="primary"
                   fixed style="margin:2%; bottom:0px; left:0px"
                   v-on:click="submitImg"
+                  :loading="uploading"
                 >
                   Submit
                 </v-btn>
@@ -297,18 +298,24 @@
         imgs: [],
         alert: false,
         alertMsg: "",
+        uploading: false,
       },
       methods: {
         submitImg: function (event) {
           if (this.imgs.length) {
-            this.uploadingPage = false;
             // TODO: the real uploading things
-            let postURL = ""
+            let postURL = "testFE2"
             var formData = new FormData();
-            this.imgs.forEach(img -> formData.append("images", img));
+            this.imgs.forEach(img => formData.append("images", img));
+            this.uploading = true;
             axios.post(postURL, formData, {
               timeoutL:1000000,
-            }).then(function(res) {console.log(res);})
+            }).then(function(res) {
+              this.uploading = false;
+              this.uploadingPage = false; // switch page
+
+              console.log(res);
+            }.bind(this))
           } else {
             this.raiseAlert("No images to submit");
           }
