@@ -31,5 +31,5 @@ Our Master branch corresponds to stable releases and code, so currently looks a 
 ## Also See:
 - Our Trello board: http://bit.ly/2yU7jBK
 - Our document archive: http://bit.ly/2qEDXCZ
-- Our blog: https://missingmaps.home.blog/
+- Our blog: https://uonmissingmaps.home.blog/
 
