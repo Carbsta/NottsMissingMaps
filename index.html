@@ -68,7 +68,7 @@
               <v-container fluid grid-list-xl>
                 <v-layout row wrap>
                   <v-flex d-flex xs6 v-for="file in imgs">
-                    <img-card upload :file="file" :files="imgs"/>
+                    <img-card upload :img="file" :imgs="imgs"/>
                   </v-flex>
                 </v-layout>
               </v-container>
@@ -93,8 +93,8 @@
                 </v-btn>
               </v-toolbar>
               <v-layout row wrap>
-                <v-flex d-flex xs4 v-for="file in imgs">
-                  <img-card ref="report_card" :file="file" :files="imgs"/>
+                <v-flex d-flex xs4 v-for="img in imgs">
+                  <img-card ref="report_card" :img="img" :imgs="imgs"/>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -154,7 +154,7 @@
             this.addFiles(e.dataTransfer.files)
           }.bind(this));
 
-          dragoverClasses = ["is-dragover",,]
+          dragoverClasses = ["is-dragover",]
           // drag over
           this.$refs.fileform.addEventListener('dragover', function(e){
             dragoverClasses.forEach(className =>
@@ -182,7 +182,7 @@
           let invalidFile = files.length - filtered.length;
           if (invalidFile)
             this.alert(invalidFile + " of " + files.length + " file(s) are invalid and ignored!");
-          filtered.forEach(file => fileArr.push(file))
+          filtered.forEach(file => fileArr.push({file:file, result: {}}))
         }
       },
       template: `
@@ -203,7 +203,7 @@
     //////////////////////////////
     Vue.component('img-card', {
       delimiters: ['{(', ')}'],
-      props: {upload: Boolean, file: File, files: Array},
+      props: {upload: Boolean, img: Object, imgs: Array},
       data: function () {
         return {
           show: false,
@@ -212,22 +212,22 @@
       },
       methods:{
         dismiss: function() {
-          for (let i = 0; i < this.files.length; i++) {
-            if (this.files[i] === this.file) {
-              this.files.splice(i, 1)
+          for (let i = 0; i < this.imgs.length; i++) {
+            if (this.imgs[i].file === this.img.file) {
+              this.imgs.splice(i, 1)
             }
           }
         },
         download: function() {
           let link = document.createElement("a");
-          link.download = this.file.name;
+          link.download = this.img.file.name;
           link.href = this.imgUrl;
           link.click();
         }
       },
       computed: {
         fileSize: function() {
-            let kb = this.file.size / 1024
+            let kb = this.img.file.size / 1024
             if (kb < 100) {
                 return kb.toFixed(2) + " KB"
             } else {
@@ -236,15 +236,25 @@
             }
         },
         imgUrl: function () {
-          return window.URL.createObjectURL(this.file)
+          return window.URL.createObjectURL(this.img.file)
         },
         reportInfo: function() {
-          return [
-            `Here should be the report details. Some random stuff here now`,
-            `Name: ${this.file.name}`,
-            `LastModifiedDate: ${this.file.lastModifiedDate}`,
-            `Type: ${this.file.type}\n`,
-          ];
+          // every line is an element in the returned list
+          console.log(this.img.result.images);
+          if (!this.img.result.images) {
+            return [
+              `Here should be the report details. Some random stuff here now`,
+              `Name: ${this.img.file.name}`,
+              `LastModifiedDate: ${this.img.file.lastModifiedDate}`,
+              `Type: ${this.img.file.type}\n`,
+            ];
+          } else {
+            let classifier = this.img.result.images[0].classifiers[0]
+            return [
+              `classifier_id: ${classifier.classifier_id}`,
+            ].concat(classifier.classes.map(oneClass => `${oneClass.class}: \t ${oneClass.score}` +
+              (oneClass.type_hierarchy ? ` from \t ${oneClass.type_hierarchy}` : "")))
+          }
         }
       },
 
@@ -258,7 +268,7 @@
                 </v-flex>
                 <v-spacer />
                 <div>
-                  <h3 class="headline mb-0" >{(file.name)}</h3>
+                  <h3 class="headline mb-0" >{(img.file.name)}</h3>
                   <div>{(upload ? this.fileSize : this.fileSize)}</div>
                 </div>
               </v-card-title>
@@ -278,7 +288,7 @@
               </v-card-actions>
               <v-slide-y-transition>
                 <v-card-text v-show = "show">
-                  <div v-for="line in reportInfo">{(line)}</div>
+                  <div v-for="line in reportInfo" style="margin-bottom: 10px">{(line)}</div>
                 </v-card-text>
               </v-slide-y-transition>
             </v-card>
@@ -306,15 +316,24 @@
             // TODO: the real uploading things
             let postURL = "testFE2"
             var formData = new FormData();
-            this.imgs.forEach(img => formData.append("images", img));
+            this.imgs.forEach(img => formData.append("images", img.file));
             this.uploading = true;
             axios.post(postURL, formData, {
               timeoutL:1000000,
             }).then(function(res) {
+              console.log(res);
+              let results = res.data
+              if (results.length != this.imgs.length) {
+                console.log("results.length != this.imgs.length, this should never happens");
+              } else {
+                for (let i = 0; i < results.length; i++) {
+                  this.imgs[i].result = results[i]
+                }
+              }
+
+              // end of processing
               this.uploading = false;
               this.uploadingPage = false; // switch page
-
-              console.log(res);
             }.bind(this))
           } else {
             this.raiseAlert("No images to submit");
