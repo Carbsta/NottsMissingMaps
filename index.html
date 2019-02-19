@@ -107,6 +107,7 @@
 
   <script src="https://vuejs.org/js/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
 
 
@@ -302,6 +303,12 @@
           if (this.imgs.length) {
             this.uploadingPage = false;
             // TODO: the real uploading things
+            let postURL = ""
+            var formData = new FormData();
+            this.imgs.forEach(img -> formData.append("images", img));
+            axios.post(postURL, formData, {
+              timeoutL:1000000,
+            }).then(function(res) {console.log(res);})
           } else {
             this.raiseAlert("No images to submit");
           }
