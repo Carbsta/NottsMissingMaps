@@ -21,9 +21,8 @@ We are a group of students from the University of Nottingham, currently studying
 - [Sen Lin](https://github.com/SenLin0710), front end developer and style sheet maintainer.
 - [Luke Ellis](https://github.com/Luke551), blog-master, front-end dev and data-set researcher.
 
-## Our Blog (coming soon):
-As part of our work with IBM we are writing about our experience developing this webapp, and delivering that experience through blog posts written by all of us.
-We are busy in the process of building this blog space and are looking forward to bringing you more information about our journey soon!
+## Our Blog:
+As part of our work with IBM we are writing about our experience developing this webapp, and delivering that experience through blog posts written by all of us. As we develop the application, after every sprint, we will update the blog with our experiences, and the work that we have done. We are looking forward to bringing you more information about our journey over the coming weeks!
 
 ## Our Workflow:
 We are producing this app in an agile way using the kaban methodology, we have a [trello board](http://bit.ly/2yU7jBK "Our Trello") where you can see tasks as they move through the development pipeline as well as using the [feature-branch git workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow "Atlassian feature branch workflow tutorial").
@@ -32,4 +31,4 @@ Our Master branch corresponds to stable releases and code, so currently looks a 
 ## Also See:
 - Our Trello board: http://bit.ly/2yU7jBK
 - Our document archive: http://bit.ly/2qEDXCZ
-- Our **blog!** __*link coming soon*__
+- Our blog: https://uonmissingmaps.home.blog/
