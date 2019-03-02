@@ -6,4 +6,5 @@ applications:
     instances: 1
     disk_quota: 1024M
     services:
-      - TestNodeRedNott-cloudantNoSQLDB
+      - NottNodeRed-cloudantNoSQLDB
+
