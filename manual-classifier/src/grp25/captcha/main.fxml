@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="457.0" prefWidth="540.0" spacing="10.0"
+      xmlns="http://javafx.com/javafx/8.0.172-ea" fx:controller="grp25.captcha.Controller">
+    <AnchorPane prefHeight="200.0" prefWidth="200.0">
+        <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                  AnchorPane.topAnchor="0.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                <Label text="Source Folder: "/>
+                <Button fx:id="sourceBtn" mnemonicParsing="false" onAction="#chooseSource"
+                        text="choose folder"/>
+                <Label fx:id="sourceLabel" text="file path" visible="false"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0"
+                  GridPane.columnIndex="1">
+                <Label text="Target Folder: "/>
+                <Button fx:id="targetBtn" mnemonicParsing="false" onAction="#chooseTarget"
+                        text="choose folder"/>
+                <Label fx:id="targetLabel" text="file path" visible="false"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="280.0" layoutY="10.0" prefHeight="100.0"
+                  prefWidth="200.0" GridPane.rowIndex="1">
+                <Label text="Flatten Source:"/>
+                <ToggleButton fx:id="useFlatten" mnemonicParsing="false" selected="true" text="On"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="77.0" prefHeight="100.0" prefWidth="200.0"
+                  GridPane.rowIndex="2">
+                <Label text="X Slices:"/>
+                <Slider blockIncrement="1.0" majorTickUnit="1.0" max="50.0" min="2.0" minorTickCount="0"
+                        snapToTicks="true" value="2.0" fx:id="xSlicesSlider"/>
+                <Label text="Label" fx:id="xSlicesLabel"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" prefHeight="100.0" prefWidth="200.0"
+                  GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <Label text="Y Slices:"/>
+                <Slider fx:id="ySlicesSlider" blockIncrement="1.0" majorTickUnit="1.0" max="50.0"
+                        min="2.0" minorTickCount="0" snapToTicks="true" value="2.0"/>
+                <Label fx:id="ySlicesLabel" text="Label"/>
+            </HBox>
+        </GridPane>
+    </AnchorPane>
+    <HBox>
+        <padding>
+            <Insets left="10.0" right="10.0"/>
+        </padding>
+        <Button fx:id="endBtn" layoutX="487.0" layoutY="10.0" mnemonicParsing="false" onAction="#onEnd"
+                text="End Classification" textAlignment="RIGHT"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="startBtn" mnemonicParsing="false" onAction="#onStart" text="START"
+                textAlignment="RIGHT"/>
+    </HBox>
+    <HBox alignment="CENTER">
+        <padding>
+            <Insets left="10.0" right="10.0"/>
+        </padding>
+        <Button fx:id="prevBtn" mnemonicParsing="false" onAction="#prevImg" text="previous"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="imgIdx" text="Label"/>
+        <Label text=" of "/>
+        <Label fx:id="imgTotal" text="Label"/>
+        <Region layoutX="86.0" layoutY="10.0" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="nextBtn" mnemonicParsing="false" onAction="#nextImg" text="next" textAlignment="RIGHT"/>
+    </HBox>
+    <StackPane fx:id="gridContainer">
+        <GridPane fx:id="grid" alignment="CENTER" gridLinesVisible="true" StackPane.alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints/>
+            </rowConstraints>
+        </GridPane>
+    </StackPane>
+</VBox>

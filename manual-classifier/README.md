@@ -1,0 +1,30 @@
+# Captcha Style Manual Classifier
+
+This is the Java code for the manual classifier, which is used to enrich our map data base.
+
+
+## To build and run
+
+We use:
+- IntelliJ IDEA (2018.3.5 Ultimate Edition)
+- Java 10
+
+However, only source file are kept in this repository. In this way, all IDE should be able to run these code as long as using Java 10.
+
+
+## Use the classifier
+
+1. Choose the source folder, which contains pictures to classify. Currently, only png files are tested to be supported, but in theory all image format supported by Java should be fine.
+2. Choose the target folder. You can set it to anywhere, evern the same as source folder.
+3. Configure the "X slices" and "Y slices". For example, if X is set to 4 and Y is set to 6, you images will be cut into 4 * 6 slices.
+4. Flatten source functionality is not currently implemented. Noting will happens if you change it. The program will just read image files in source folder, ignoring all other things including sub folders, if there is any.
+5. Click start to start classifying.
+6. When classifying, all patches are originally set to NON_HABITABLE, which are marked with BLUE border. You can click them to change them to GREEN, which stands for HABITABLE.
+7. After finished, click the "End Classification" button and the program will generate the output and then exit.
+
+
+## TODO
+
+- Enable the flatten source feature, which will let the program search images recursively.
+- Enable changing X Slices & Y Slices while classifying. Currently they are locked after starting classifying.
+- Generalize the program to support richer tags, rather than simple binary habitable/non-habitable.
