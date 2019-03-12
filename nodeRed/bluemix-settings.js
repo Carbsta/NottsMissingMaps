@@ -53,7 +53,10 @@ var settings = module.exports = {
     // Serve up the welcome page
     httpStatic: path.join(__dirname,"public"),
 
-    functionGlobalContext: { },
+    functionGlobalContext: { 
+        // refer to : https://nodered.org/docs/writing-functions.html#global-context
+         ImageToSliceModule:require('image-to-slices')
+    },
 
     // Configure the logging output
     logging: {
