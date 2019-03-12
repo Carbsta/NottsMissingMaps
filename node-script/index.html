@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+{{{style}}}
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-content>
+        <v-layout row wrap>
+
+          <!-- The top tool bar -->
+          <v-card>
+            <v-toolbar fixed>
+              <v-btn icon v-on:click="goHome()">
+                <v-icon>home</v-icon>
+              </v-btn>
+              <v-toolbar-title>Missing Maps</v-toolbar-title>
+            </v-toolbar>
+          </v-card>
+
+          <v-flex xs12>  <!-- take the space of the floatting toolbar -->
+            <div style="height: 70px"> </div>
+          </v-flex>
+
+          <!-- uploading page content -->
+          <template v-if="uploadingPage">
+            <!-- drag drop box -->
+            <v-flex xs6>
+              <v-flex>
+                <drag-drop-box :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
+              </v-flex>
+
+              <!-- Alert window -->
+              <v-flex>
+                <v-toolbar flat fixed class="transparent" style="left: 230px">
+                  <v-alert
+                    dismissible
+                    v-model="alert"
+                    type="error"
+                    icon="new_releases"
+                    transition="scale-transition"
+                  >
+                    {(alertMsg)}
+                  </v-alert>
+                </v-toolbar>
+              </v-flex>
+
+              <!-- Bottom submit button -->
+              <v-flex>
+                <v-btn
+                  class="text-none"
+                  color="primary"
+                  fixed style="margin:2%; bottom:0px; left:0px"
+                  v-on:click="submitImg"
+                  :loading="uploading"
+                  >
+                  Submit
+                </v-btn>
+              </v-flex>
+            </v-flex>
+
+            <!-- Right part -->
+            <v-flex xs6>
+              <v-container fluid grid-list-xl>
+                <v-layout row wrap>
+                  <v-flex d-flex xs6 v-for="file in imgs">
+                    <img-card upload :img="file" :imgs="imgs" :uploading="uploading"/>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-flex>
+          </template>
+
+          <!-- report page content -->
+          <template v-else>
+            <v-container fluid grid-list-xl>
+              <v-toolbar floatting flat style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto" class="transparent">
+                <v-btn color="info" v-on:click="expend_all(true)">
+                  <v-icon>unfold_more</v-icon>
+                  Expend All
+                </v-btn>
+                <v-btn color="info" v-on:click="expend_all(false)">
+                  <v-icon>unfold_less</v-icon>
+                  Collapse All
+                </v-btn>
+                <v-btn color="info">
+                  <v-icon>arrow_downward</v-icon>
+                  Download All
+                </v-btn>
+              </v-toolbar>
+              <v-layout row wrap>
+                <v-flex d-flex xs4 v-for="img in imgs">
+                  <img-card ref="report_card" :img="img" :imgs="imgs"/>
+                </v-flex>
+              </v-layout>
+              <br>
+              <br>
+              <br>
+            </v-container>
+
+
+          </template>
+        </v-layout>
+      </v-content>
+    </v-app>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://vuejs.org/js/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+  {{{dragAndDrop}}}
+  {{{imageCard}}}
+  {{{mainVueInstance}}}
+  
+</body>
+</html>
