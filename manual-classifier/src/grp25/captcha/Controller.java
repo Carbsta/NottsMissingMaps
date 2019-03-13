@@ -29,7 +29,7 @@ public class Controller {
 
     @FXML Label sourceLabel, targetLabel, imgIdx, imgTotal, xSlicesLabel, ySlicesLabel;
 
-    @FXML Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, endBtn;
+    @FXML Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, endBtn, segmentBtn, allHab, allNon;
 
     @FXML ToggleButton useFlatten, diffDir;
 
@@ -50,13 +50,14 @@ public class Controller {
         imgsWithTags = ClassifierManager.getInstance().getImgsWithTags();
 
 
-        imgIdxProperty = new SimpleIntegerProperty(-1); // index from 0
+        imgIdxProperty = new SimpleIntegerProperty(0); // index from 0
         ClassifierManager.getInstance().setCurrImg(imgIdxProperty);
         imgIdxProperty.addListener((dummy, dummy_, val) -> {
             prevBtn.setDisable((int) val <= 0);
             nextBtn.setDisable((int) val >= totalImgProperty.get() - 1);
             render();
         });
+        imgIdxProperty.set(-1);
         imgIdx.textProperty().bind(imgIdxProperty.add(1).asString());
 
 
@@ -77,7 +78,11 @@ public class Controller {
         diffDir.disableProperty().bind(bp);
 
         startBtn.disableProperty().bind(bp);
+        segmentBtn.disableProperty().bind(bp);
         endBtn.disableProperty().bind(bp.not());
+        allHab.disableProperty().bind(bp.not());
+        allNon.disableProperty().bind(bp.not());
+
 
         imgTotal.textProperty().bind(totalImgProperty.asString());
         grid.setVgap(.5);
@@ -135,6 +140,12 @@ public class Controller {
         ClassifierManager.getInstance().saveSegment();
     }
 
+    public void setAll(ActionEvent e) {
+        imgsWithTags.get(imgIdxProperty.get()).setAll(
+                ((Button) e.getSource()).getText().equals("set all hab"));
+        render();
+    }
+
     public void prevImg() {
         imgIdxProperty.set(imgIdxProperty.get() - 1);
     }
@@ -176,7 +187,7 @@ public class Controller {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ImageIO.write(it.getPitch(row, col), it.getType(), baos);
                 iv.setImage(new Image(new ByteArrayInputStream(baos.toByteArray())));
-                iv.setFitHeight(500d / colsProperty.get());
+                iv.setFitHeight(700d / colsProperty.get());
                 iv.setPreserveRatio(true);
                 getChildren().add(iv);
                 Tag t = it.getTag(row, col);

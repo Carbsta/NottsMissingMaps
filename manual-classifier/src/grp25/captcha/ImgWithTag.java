@@ -11,6 +11,9 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static grp25.captcha.tag.Binary.HABITABLE;
+import static grp25.captcha.tag.Binary.NON_HABITABLE;
+
 class ImgWithTag {
     private File img;
     private ArrayList<Tag> ts;
@@ -65,5 +68,10 @@ class ImgWithTag {
                     "in a grid of row " + rows + " col " + cols+".";
             throw  new IndexOutOfBoundsException(info);
         }
+    }
+    public void setAll(boolean hab) {
+        this.ts = new ArrayList<>(Collections.nCopies(rows * cols,
+                hab ? HABITABLE : NON_HABITABLE
+        )); // TODO: change to generic type!!!
     }
 }
