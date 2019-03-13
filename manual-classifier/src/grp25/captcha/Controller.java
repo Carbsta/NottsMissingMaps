@@ -31,7 +31,7 @@ public class Controller {
 
     @FXML Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, endBtn;
 
-    @FXML ToggleButton useFlatten;
+    @FXML ToggleButton useFlatten, diffDir;
 
     @FXML Slider xSlicesSlider, ySlicesSlider;
 
@@ -59,6 +59,7 @@ public class Controller {
         });
         imgIdx.textProperty().bind(imgIdxProperty.add(1).asString());
 
+
         // visible properties
         sourceBtn.visibleProperty().bind(bp.not());
         targetBtn.visibleProperty().bind(bp.not());
@@ -68,6 +69,13 @@ public class Controller {
             ClassifierManager.getInstance().setUseFlatten(selected);
         });
         useFlatten.disableProperty().bind(bp);
+
+        diffDir.selectedProperty().addListener((dummy, dummy_, selected) -> {
+            diffDir.setText(selected ? "ON" : "OFF");
+            ClassifierManager.getInstance().setDiffDir(selected);
+        });
+        diffDir.disableProperty().bind(bp);
+
         startBtn.disableProperty().bind(bp);
         endBtn.disableProperty().bind(bp.not());
 
@@ -114,7 +122,7 @@ public class Controller {
         } else {
             System.out.println("Something Not set: " +
                     (sourceLabel.isVisible() ? "" : sourceLabel) +
-                    (targetLabel.isVisible() ? "" : "\n\nand\n\n" + targetLabel));
+                    (targetLabel.isVisible() ? "" : "\nand\n" + targetLabel + "\n\n"));
         }
     }
 
@@ -122,6 +130,10 @@ public class Controller {
         ClassifierManager.getInstance().save();
     }
 
+    public void onSegment() {
+        onStart ();
+        ClassifierManager.getInstance().saveSegment();
+    }
 
     public void prevImg() {
         imgIdxProperty.set(imgIdxProperty.get() - 1);

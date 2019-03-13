@@ -28,15 +28,12 @@ class ClassifierManager {
     private IntegerProperty cols = new SimpleIntegerProperty(2);
     private IntegerProperty currImg;
 
-    // Source directory
-    private File source;
-
-    // Target directory
-    private File target;
+    // Source & target directory
+    private File source, target;
 
     private ArrayList<ImgWithTag> imgsWithTags = new ArrayList<>();
 
-    private boolean useFlatten = false;
+    private boolean useFlatten = false, diffDir = true;
 
     private ClassifierManager() {
         started.addListener((dummy, dummy_, start) -> {
@@ -61,7 +58,7 @@ class ClassifierManager {
         Arrays.stream(imgs).filter(f -> {
             try {
                 return f.isFile() && Files.probeContentType(f.toPath()).split("/")[0].equals("image");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 return false;
             }
         }).forEach(f -> {
@@ -81,12 +78,17 @@ class ClassifierManager {
 
     void save() {
         try {
+            File out = makeFolder();
 
-            File out = new File(target, "output");
-            if (!out.exists()) out.mkdirs();
             for (ImgWithTag it : imgsWithTags) {
-                File curr = new File(out, it.getImg().getName().replace('.', '_'));
-                curr.mkdirs();
+                String original_file_name = it.getImg().getName().replace('.', '_');
+
+                File curr;
+                if (diffDir) {
+                    curr = new File(out, original_file_name);
+                    curr.mkdirs();
+                } else { curr = out; }
+
                 File hab = new File(curr, "hab");
                 hab.mkdirs();
                 File non = new File(curr, "non");
@@ -94,10 +96,11 @@ class ClassifierManager {
                 for (int y = 0; y < rows.get(); y++) {
                     for (int x = 0; x < cols.get(); x++) {
                         BufferedImage i = it.getPitch(y, x);
+                        String name = original_file_name + "-" + x + " " + y + "." + it.getType();
                         if (((Binary) (it.getTag(y, x))) == HABITABLE) {
-                            ImageIO.write(i, it.getType(), new File(hab, x + " " + y + "." + it.getType()));
+                            ImageIO.write(i, it.getType(), new File(hab, name));
                         } else if (((Binary) (it.getTag(y, x))) == NON_HABITABLE) {
-                            ImageIO.write(i, it.getType(), new File(non, x + " " + y + "." + it.getType()));
+                            ImageIO.write(i, it.getType(), new File(non, name));
                         } else {
                             System.out.println("!!!!!!!!!!!!! Not Here");
                         }
@@ -111,6 +114,42 @@ class ClassifierManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    void saveSegment() {
+        try {
+            File out = makeFolder();
+            for (ImgWithTag it : imgsWithTags) {
+                String original_file_name = it.getImg().getName().replace('.', '_');
+
+                File curr;
+                if (diffDir) {
+                    curr = new File(out, original_file_name);
+                    curr.mkdirs();
+                } else { curr = out; }
+
+                for (int y = 0; y < rows.get(); y++) {
+                    for (int x = 0; x < cols.get(); x++) {
+                        BufferedImage i = it.getPitch(y, x);
+                        ImageIO.write(i, it.getType(), new File(curr, original_file_name + "-" + x + " " + y + "." + it.getType()));
+                    }
+                }
+            }
+            System.out.println("////////////////////////////");
+            System.out.println("////////// Success /////////");
+            System.out.println("////////////////////////////");
+            exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private File makeFolder() {
+        File out;
+        int folderIdx = 0;
+        while ((out = new File(target, "output" + ((folderIdx == 0) ? "" : "_" + folderIdx))).exists())
+            folderIdx++;
+        return out.mkdirs() ? out : null;
     }
 
     void setSource(File source) {
@@ -150,5 +189,9 @@ class ClassifierManager {
 
     void setCurrImg(IntegerProperty p) {
         currImg = p;
+    }
+
+    public void setDiffDir(boolean diffDir) {
+        this.diffDir = diffDir;
     }
 }
