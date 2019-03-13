@@ -21,11 +21,11 @@ class ImgWithTag {
     private int cols;
     public BufferedImage[] bis;
 
-    ImgWithTag(File img, int rows, int cols) throws IOException {
+    ImgWithTag(File img, int rows, int cols, boolean hab) throws IOException {
         this.img = img;
         this.rows = rows;
         this.cols = cols;
-        this.ts = new ArrayList<>(Collections.nCopies(rows * cols, Binary.getDefault())); // TODO: change to generic type!!!
+        this.ts = new ArrayList<>(Collections.nCopies(rows * cols, hab ? HABITABLE : NON_HABITABLE)); // TODO: change to generic type!!!
         BufferedImage bi = ImageIO.read(img);
         int w = bi.getWidth() / cols;
         int h = bi.getHeight() / rows;

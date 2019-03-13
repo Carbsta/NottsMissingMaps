@@ -68,6 +68,7 @@
          <children>
             <Button fx:id="segmentBtn" mnemonicParsing="false" onAction="#onSegment" text="Just Segment" />
               <Button fx:id="startBtn" mnemonicParsing="false" onAction="#onStart" text="START" textAlignment="RIGHT" />
+            <Button fx:id="startWithHabBtn" layoutX="114.0" layoutY="10.0" mnemonicParsing="false" onAction="#onStartWithHab" text="START with all Hab" textAlignment="RIGHT" />
          </children>
       </HBox>
     </HBox>

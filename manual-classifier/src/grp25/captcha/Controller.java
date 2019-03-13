@@ -29,7 +29,7 @@ public class Controller {
 
     @FXML Label sourceLabel, targetLabel, imgIdx, imgTotal, xSlicesLabel, ySlicesLabel;
 
-    @FXML Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, endBtn, segmentBtn, allHab, allNon;
+    @FXML Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, startWithHabBtn, endBtn, segmentBtn, allHab, allNon;
 
     @FXML ToggleButton useFlatten, diffDir;
 
@@ -78,6 +78,7 @@ public class Controller {
         diffDir.disableProperty().bind(bp);
 
         startBtn.disableProperty().bind(bp);
+        startWithHabBtn.disableProperty().bind(bp);
         segmentBtn.disableProperty().bind(bp);
         endBtn.disableProperty().bind(bp.not());
         allHab.disableProperty().bind(bp.not());
@@ -129,6 +130,11 @@ public class Controller {
                     (sourceLabel.isVisible() ? "" : sourceLabel) +
                     (targetLabel.isVisible() ? "" : "\nand\n" + targetLabel + "\n\n"));
         }
+    }
+
+    public void onStartWithHab() {
+        ClassifierManager.getInstance().setDefaultHab(true);
+        onStart();
     }
 
     public void onEnd() {

@@ -33,7 +33,7 @@ class ClassifierManager {
 
     private ArrayList<ImgWithTag> imgsWithTags = new ArrayList<>();
 
-    private boolean useFlatten = false, diffDir = true;
+    private boolean useFlatten = false, diffDir = true, defaultHab = false;
 
     private ClassifierManager() {
         started.addListener((dummy, dummy_, start) -> {
@@ -64,7 +64,7 @@ class ClassifierManager {
         }).forEach(f -> {
             totalImg.set(totalImg.get() + 1);
             try {
-                imgsWithTags.add(new ImgWithTag(f, rows.get(), cols.get()));
+                imgsWithTags.add(new ImgWithTag(f, rows.get(), cols.get(), defaultHab));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -193,5 +193,9 @@ class ClassifierManager {
 
     public void setDiffDir(boolean diffDir) {
         this.diffDir = diffDir;
+    }
+
+    public void setDefaultHab(boolean defaultHab) {
+        this.defaultHab = defaultHab;
     }
 }
