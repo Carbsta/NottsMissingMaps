@@ -25,6 +25,7 @@ However, only source file are kept in this repository. In this way, all IDE shou
     1. Click "start" / "start with all hab" to start classifying.
     2. When classifying, all patches are originally set to NON_HABITABLE (or HABITABLE if you clicked "start with all hab"), which are marked with BLUE border. You can click them to change them to GREEN, which stands for HABITABLE. ALSO, you can click the "set all hab" and "set all non-hab" to set all of tails in the current image to be habitable/non-habitable.
     3. After finished, click the "End Classification" button and the program will generate the output and then exit.
+8. The result will be put in "output" dir below the source folder specified. If there is a dir called "output", the result will be put into "output_1" or "output_2" and so on.
 
 
 ## TODO

@@ -143,7 +143,8 @@ public class Controller {
 
     public void onSegment() {
         onStart ();
-        ClassifierManager.getInstance().saveSegment();
+        if (ClassifierManager.getInstance().startedProperty().get())
+            ClassifierManager.getInstance().saveSegment();
     }
 
     public void setAll(ActionEvent e) {
