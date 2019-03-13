@@ -18,9 +18,13 @@ However, only source file are kept in this repository. In this way, all IDE shou
 2. Choose the target folder. You can set it to anywhere, evern the same as source folder.
 3. Configure the "X slices" and "Y slices". For example, if X is set to 4 and Y is set to 6, you images will be cut into 4 * 6 slices.
 4. Flatten source functionality is not currently implemented. Noting will happens if you change it. The program will just read image files in source folder, ignoring all other things including sub folders, if there is any.
-5. Click start to start classifying.
-6. When classifying, all patches are originally set to NON_HABITABLE, which are marked with BLUE border. You can click them to change them to GREEN, which stands for HABITABLE.
-7. After finished, click the "End Classification" button and the program will generate the output and then exit.
+5. Toggle the "Put result from different images  in different dir" button if you need. 
+6. if you just want to segment images without tagging:
+    1. Click the "Just Segment" button to perform the task. The program will automatically exit after finished.
+7. Else:
+    1. Click "start" / "start with all hab" to start classifying.
+    2. When classifying, all patches are originally set to NON_HABITABLE (or HABITABLE if you clicked "start with all hab"), which are marked with BLUE border. You can click them to change them to GREEN, which stands for HABITABLE. ALSO, you can click the "set all hab" and "set all non-hab" to set all of tails in the current image to be habitable/non-habitable.
+    3. After finished, click the "End Classification" button and the program will generate the output and then exit.
 
 
 ## TODO
