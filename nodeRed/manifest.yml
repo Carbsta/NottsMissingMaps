@@ -2,9 +2,8 @@ applications:
   - path: .
     name: TestNodeRedNott
     environment_json: {}
-    memory: 256M
+    memory: 1024M
     instances: 1
     disk_quota: 1024M
     services:
       - NottNodeRed-cloudantNoSQLDB
-

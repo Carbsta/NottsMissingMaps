@@ -60,7 +60,7 @@ var settings = module.exports = {
         fsModule: require('fs'),
         datauriModule: require('datauri'),
         imageSizeModule: require('image-size'),
-        rimrafModule: require("rimraf")
+        dataUriToBufferModule: require("data-uri-to-buffer")
     },
 
     // Configure the logging output
