@@ -58,7 +58,8 @@ var settings = module.exports = {
         imageToSliceModule: require('image-to-slices'),
         canvasModule: require('canvas'),
         fsModule: require('fs'),
-        datauriModule: require('datauri')
+        datauriModule: require('datauri'),
+        imageSizeModule: require('image-size')
     },
 
     // Configure the logging output
