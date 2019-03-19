@@ -53,11 +53,12 @@ var settings = module.exports = {
     // Serve up the welcome page
     httpStatic: path.join(__dirname,"public"),
 
-    functionGlobalContext: { 
+    functionGlobalContext: {
         // refer to : https://nodered.org/docs/writing-functions.html#global-context
         imageToSliceModule: require('image-to-slices'),
         canvasModule: require('canvas'),
-        fsModule: require('fs')
+        fsModule: require('fs'),
+        datauriModule: require('datauri')
     },
 
     // Configure the logging output
