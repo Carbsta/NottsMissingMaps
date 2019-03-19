@@ -56,7 +56,8 @@ var settings = module.exports = {
     functionGlobalContext: { 
         // refer to : https://nodered.org/docs/writing-functions.html#global-context
         imageToSliceModule: require('image-to-slices'),
-        canvasModule: require('canvas')
+        canvasModule: require('canvas'),
+        fsModule: require('fs')
     },
 
     // Configure the logging output
