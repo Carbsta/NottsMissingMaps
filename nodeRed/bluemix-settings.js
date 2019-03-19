@@ -59,7 +59,8 @@ var settings = module.exports = {
         canvasModule: require('canvas'),
         fsModule: require('fs'),
         datauriModule: require('datauri'),
-        imageSizeModule: require('image-size')
+        imageSizeModule: require('image-size'),
+        rimrafModule: require("rimraf")
     },
 
     // Configure the logging output

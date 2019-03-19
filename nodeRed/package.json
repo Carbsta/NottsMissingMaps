@@ -25,7 +25,8 @@
         "canvas": "2.3.1",
         "node-red-contrib-cos": "0.0.15",
         "datauri": "1.1.0",
-        "image-size": "0.7.2"
+        "image-size": "0.7.2",
+        "rimraf": "2.6.3"
     },
 
     "scripts": {
