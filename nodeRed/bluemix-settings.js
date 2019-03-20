@@ -29,6 +29,12 @@ fs.mkdirSync(userDir);
 fs.mkdirSync(path.join(userDir,"node_modules"));
 
 var settings = module.exports = {
+    editorTheme: {
+        projects: {
+            enabled: true
+        }
+    },
+    
     uiPort: process.env.PORT || 1880,
     mqttReconnectTime: 15000,
     debugMaxLength: 1000,
