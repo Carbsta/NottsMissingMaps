@@ -63,6 +63,8 @@ var settings = module.exports = {
         imageSizeModule: require('image-size'),
         dataUriToBufferModule: require("data-uri-to-buffer")
     },
+    
+    httpNodeCors: { origin: "*", methods: ['GET','PUT','POST','DELETE'] },
 
     // Configure the logging output
     logging: {
