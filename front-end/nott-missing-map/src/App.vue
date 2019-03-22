@@ -79,7 +79,7 @@
                   <v-icon>unfold_less</v-icon>
                   Collapse All
                 </v-btn>
-                <v-btn color="info">
+                <v-btn color="info" v-on:click="download_all">
                   <v-icon>arrow_downward</v-icon>
                   Download All
                 </v-btn>
@@ -104,9 +104,10 @@
 import DragDropBox from './components/DragDropBox.vue'
 import PreviewCard from './components/PreviewCard.vue'
 import ReportCard from './components/ReportCard.vue'
+import { saveAs } from 'file-saver'
+import axios from 'axios'
+import JSZip from 'jszip'
 
-const axios = require('axios');
-const JSZip = require("jszip");
 
 export default {
   name: 'app',
@@ -130,20 +131,21 @@ export default {
         // eslint-disable-next-line
         let postURL = "https://nottnodered.eu-gb.mybluemix.net/ts2"
         // eslint-disable-next-line
-        let postURL_test = "https://nottnodered.eu-gb.mybluemix.net/sample_data"
+        let getURL_test = "https://nottnodered.eu-gb.mybluemix.net/sample_data?len=" + this.imgs.length
 
         var formData = new FormData();
         this.imgs.forEach(img => formData.append("images", img.file));
         formData.set("xSlice", this.slice[0]);
         formData.set("ySlice", this.slice[1]);
         //axios.post(postURL, formData, {
-        axios.post(postURL_test, formData, {
+        axios.get(getURL_test, formData, {
           timeout:100000, // 100s
         }).then(function(res) {
           console.log(res);
           let results = res.data
           if (results.length != this.imgs.length) {
             console.error("results.length != this.imgs.length, this should never happens.");
+            console.error(results)
           } else if (!results.every(rslt => rslt.length == this.slice[0] * this.slice[1])) {
             console.error("Number of slice doesn't match.");
           } else {
@@ -179,7 +181,18 @@ export default {
       [...this.$refs.report_card].forEach(function(child) {child.show = expend})
     },
     download_all: function () {
+      // eslint-disable-next-line
       var zip = new JSZip();
+      let promiseBlob = [...this.$refs.report_card]
+        .map(card => card.resultBlob)
+      Promise.all(promiseBlob).then(blobs => {
+        blobs.forEach(x => zip.file(x.name, x.blob))
+
+        // Generate zip file
+        zip.generateAsync({type : "blob"}).then(b => saveAs(b, "result.zip"))
+
+
+      })
     }
   },
   computed:{

@@ -85,7 +85,7 @@ export default {
         this.downloadCanvas(c)
       }
 
-      let img = new Image(888, 888);
+      let img = new Image();
       img.onload = load
       img.src = this.imgUrl;
     },
@@ -129,7 +129,51 @@ export default {
     resultArr: function() {
       return this.img.result.map(pitch => pitch.images[0].classifiers[0].classes[0].score)
     }
+  },
 
+  asyncComputed: {
+    resultBlob: function () {
+      return (new Promise(function (resolve, reject) {
+        let load = function (){
+          let c = this.$refs.full;
+          c.setAttribute("height", img.height)
+          c.setAttribute("width", img.width)
+          let ctx = c.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          for (let x = 0; x < this.slice[0]; x++) {
+            for (let y = 0; y < this.slice[1]; y++) {
+              let conf = this.getConfidence(x, y);
+              let width = c.width / this.slice[0]
+              let height = c.height / this.slice[1]
+              let xStart = width * x
+              let yStart = height * y
+              ctx.fillStyle="rgba(255, 0, 0, " + (1-conf) + ")"; // red stands for non-habitable
+              ctx.fillRect(xStart, yStart, width, height);
+            }
+          }
+
+          let fName = this.img.file.name;
+          fName = fName.replace(/\.[^/.]+$/, "");
+          fName += "_masked.jpg";
+
+          c.toBlob(function(blob) {
+            console.log('resolve({"blob": blob, "name": fName}) is called!');
+            resolve({
+              "blob": blob,
+              "name": fName
+            })
+          }, "image/jpg")
+        }.bind(this)
+
+
+        console.log(this.img.file);
+
+
+        let img = new Image();
+        img.onload = load
+        img.src = this.imgUrl;
+      }.bind(this)))
+    }
   },
 
   mounted: function() {
