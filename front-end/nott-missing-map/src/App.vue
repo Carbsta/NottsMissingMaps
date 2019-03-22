@@ -79,9 +79,16 @@
                   <v-icon>unfold_less</v-icon>
                   Collapse All
                 </v-btn>
-                <v-btn color="info" v-on:click="download_all">
+                <v-btn color="info"
+                  :loading="zipping"
+                  :disabled="zipping"
+                  @click="download_all"
+                >
                   <v-icon>arrow_downward</v-icon>
                   Download All
+                  <template v-slot:loader>
+                    <span>Compressing...</span>
+                  </template>
                 </v-btn>
               </v-toolbar>
               <v-layout row wrap>
@@ -119,6 +126,7 @@ export default {
       alertMsg: "",
       uploading: false,
       slice: [2, 2],
+      zipping: false,
     }
   },
   methods: {
@@ -181,7 +189,7 @@ export default {
       [...this.$refs.report_card].forEach(function(child) {child.show = expend})
     },
     download_all: function () {
-      // eslint-disable-next-line
+      this.zipping = true
       var zip = new JSZip();
       let promiseBlob = [...this.$refs.report_card]
         .map(card => card.resultBlob)
@@ -189,7 +197,10 @@ export default {
         blobs.forEach(x => zip.file(x.name, x.blob))
 
         // Generate zip file
-        zip.generateAsync({type : "blob"}).then(b => saveAs(b, "result.zip"))
+        zip.generateAsync({type : "blob"}).then(b => {
+          saveAs(b, "result.zip")
+          this.zipping = false
+        })
 
 
       })
