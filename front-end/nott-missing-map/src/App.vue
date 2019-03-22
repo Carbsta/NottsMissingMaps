@@ -86,7 +86,7 @@
               </v-toolbar>
               <v-layout row wrap>
                 <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
-                  <ReportCard ref="report_card" :img="img" :imgs="imgs"/>
+                  <ReportCard ref="report_card" :img="img" :imgs="imgs" :slice="slice"/>
                 </v-flex>
               </v-layout>
               <br>
@@ -104,7 +104,9 @@
 import DragDropBox from './components/DragDropBox.vue'
 import PreviewCard from './components/PreviewCard.vue'
 import ReportCard from './components/ReportCard.vue'
+
 const axios = require('axios');
+const JSZip = require("jszip");
 
 export default {
   name: 'app',
@@ -125,24 +127,28 @@ export default {
         this.alert = false;
         this.alertMsg = "";
 
+        // eslint-disable-next-line
         let postURL = "https://nottnodered.eu-gb.mybluemix.net/ts2"
-        let getURL = "sample-res.json"
+        // eslint-disable-next-line
+        let postURL_test = "https://nottnodered.eu-gb.mybluemix.net/sample_data"
+
         var formData = new FormData();
         this.imgs.forEach(img => formData.append("images", img.file));
         formData.set("xSlice", this.slice[0]);
         formData.set("ySlice", this.slice[1]);
-        axios.post(postURL, formData, {
-        //axios.get(getURL, formData, {
+        //axios.post(postURL, formData, {
+        axios.post(postURL_test, formData, {
           timeout:100000, // 100s
         }).then(function(res) {
           console.log(res);
           let results = res.data
           if (results.length != this.imgs.length) {
-            console.log("results.length != this.imgs.length, this should never happens");
+            console.error("results.length != this.imgs.length, this should never happens.");
+          } else if (!results.every(rslt => rslt.length == this.slice[0] * this.slice[1])) {
+            console.error("Number of slice doesn't match.");
           } else {
-            for (let i = 0; i < results.length; i++) {
-              this.imgs[i].result = results[i]
-            }
+            for (let i = 0; i < results.length; i++)
+              this.imgs[i].result = results[i];
           }
 
           // end of processing
@@ -171,6 +177,9 @@ export default {
     },
     expend_all: function (expend) {
       [...this.$refs.report_card].forEach(function(child) {child.show = expend})
+    },
+    download_all: function () {
+      var zip = new JSZip();
     }
   },
   computed:{

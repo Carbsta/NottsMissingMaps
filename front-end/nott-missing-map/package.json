@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "jszip": "^3.2.1",
     "vue": "^2.6.6",
     "vuetify": "^1.5.7"
   },
@@ -31,7 +32,12 @@
       "eslint:recommended"
     ],
     "rules": {
-      "no-unused-vars": [ "error", { "args": "none" }],
+      "no-unused-vars": [
+        "error",
+        {
+          "args": "none"
+        }
+      ],
       "no-console": "off"
     },
     "parserOptions": {
