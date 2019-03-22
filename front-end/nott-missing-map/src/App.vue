@@ -60,7 +60,7 @@
               <v-container fluid grid-list-xl>
                 <v-layout row wrap>
                   <v-flex d-flex xs6 v-for="file in imgs" :key="file.name">
-                    <PreviewCard upload :img="file" :imgs="imgs" :uploading="uploading">
+                    <PreviewCard upload :img="file" :imgs="imgs" :uploading="uploading" />
                   </v-flex>
                 </v-layout>
               </v-container>
@@ -126,11 +126,13 @@ export default {
         this.alertMsg = "";
 
         let postURL = "https://nottnodered.eu-gb.mybluemix.net/ts2"
+        let getURL = "sample-res.json"
         var formData = new FormData();
         this.imgs.forEach(img => formData.append("images", img.file));
         formData.set("xSlice", this.slice[0]);
         formData.set("ySlice", this.slice[1]);
         axios.post(postURL, formData, {
+        //axios.get(getURL, formData, {
           timeout:100000, // 100s
         }).then(function(res) {
           console.log(res);
