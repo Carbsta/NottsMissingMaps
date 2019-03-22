@@ -145,8 +145,9 @@ export default {
         this.imgs.forEach(img => formData.append("images", img.file));
         formData.set("xSlice", this.slice[0]);
         formData.set("ySlice", this.slice[1]);
-        //axios.post(postURL, formData, {
-        axios.get(getURL_test, formData, {
+
+        axios.post(postURL, formData, {
+        // axios.get(getURL_test, formData, {
           timeout:100000, // 100s
         }).then(function(res) {
           console.log(res);

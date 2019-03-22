@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import { saveAs } from 'file-saver'
+
 export default {
   name: 'ReportCard',
   props: {
@@ -50,20 +52,19 @@ export default {
   },
   methods:{
     downloadCanvas: function (canvas) {
-      let link = document.createElement("a");
       let fName = this.img.file.name;
       fName = fName.replace(/\.[^/.]+$/, "");
-      link.download = fName + "_masked.jpg";
-      link.href = canvas.toDataURL("image/jpg").replace("image/png", "image/octet-stream");
-      link.click();
+      fName += "_masked.jpg";
+
+      canvas.toBlob(function(blob) {
+        saveAs(blob, fName)
+      }, "image/jpg")
     },
     downloadThumbnail: function() {
       this.downloadCanvas(this.$refs.c)
     },
 
     download: function() {
-
-
       let load = () => {
         let c = this.$refs.full;
         c.setAttribute("height", img.height)
@@ -107,7 +108,6 @@ export default {
 
     reportInfo: function() {
       // every line is an element in the returned list
-      // console.log(this.img.result.images);
       if (this.img.result[0] === undefined) {
         return [
           `Here should be the report details. Some random stuff here now`,
@@ -157,17 +157,12 @@ export default {
           fName += "_masked.jpg";
 
           c.toBlob(function(blob) {
-            console.log('resolve({"blob": blob, "name": fName}) is called!');
             resolve({
               "blob": blob,
               "name": fName
             })
           }, "image/jpg")
         }.bind(this)
-
-
-        console.log(this.img.file);
-
 
         let img = new Image();
         img.onload = load
