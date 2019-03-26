@@ -10,6 +10,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "file-saver": "^2.0.1",
+    "image-comparison": "^2.0.4",
     "jszip": "^3.2.1",
     "vue": "^2.6.6",
     "vue-async-computed": "^3.6.1",

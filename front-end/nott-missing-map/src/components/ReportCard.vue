@@ -4,9 +4,10 @@
      <v-card>
        <v-card-title primary-title>
          <v-flex xs6>
-
-           <!-- <v-img :src="imgUrl"></v-img> -->
-           <canvas ref = "c"></canvas>
+           <div ref="container" >
+             <img :src="imgUrl" ref = "i" class="comparison-image">
+             <canvas ref = "c"></canvas>
+           </div>
            <canvas ref = "full" style="display: none"></canvas>
          </v-flex>
          <v-spacer />
@@ -37,6 +38,7 @@
 
 <script>
 import { saveAs } from 'file-saver'
+import ImageComparison from 'image-comparison';
 
 export default {
   name: 'ReportCard',
@@ -164,18 +166,48 @@ export default {
   },
 
   mounted: function() {
+    console.log(this.$refs);
     let img = new Image();
-    img.onload = () => this.draw(this.$refs.c, img, false)
+    let updateSize = () => {
+      this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
+      this.$refs.i.style.height = this.$refs.c.scrollHeight + "px"
+    }
+    img.onload = () => {
+      this.draw(this.$refs.c, img, false)
+
+      new ImageComparison({
+        container: this.$refs.container,
+        startPosition: 0,
+        data: [
+          {
+            image: this.$refs.i,
+            label: ''
+          },
+          {
+            image: this.$refs.c,
+            label: ''
+          }
+        ],
+      });
+      updateSize()
+    }
     img.src = this.imgUrl;
+    window.addEventListener("resize", e => { updateSize() } );
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
 canvas {
   width: 100%;
   height: 100%;
 }
 
+@import 'ImageComparison.css';
+
+/* Some modification */
+.comparison-separator, .comparison-control {
+  opacity: 0.5;
+}
 </style>
