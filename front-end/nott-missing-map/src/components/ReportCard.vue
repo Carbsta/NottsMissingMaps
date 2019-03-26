@@ -60,40 +60,46 @@ export default {
         saveAs(blob, fName)
       }, "image/jpg")
     },
-    downloadThumbnail: function() {
-      this.downloadCanvas(this.$refs.c)
-    },
-
-    download: function() {
-      let load = () => {
-        let c = this.$refs.full;
-        c.setAttribute("height", img.height)
-        c.setAttribute("width", img.width)
-        let ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        for (let x = 0; x < this.slice[0]; x++) {
-          for (let y = 0; y < this.slice[1]; y++) {
-            let conf = this.getConfidence(x, y);
-            let width = c.width / this.slice[0]
-            let height = c.height / this.slice[1]
-            let xStart = width * x
-            let yStart = height * y
-            ctx.fillStyle="rgba(255, 0, 0, " + (1-conf) + ")"; // red stands for non-habitable
-            ctx.fillRect(xStart, yStart, width, height);
-          }
-        }
-
-        this.downloadCanvas(c)
-      }
-
-      let img = new Image();
-      img.onload = load
-      img.src = this.imgUrl;
-    },
 
     getConfidence: function(x, y) {
       return this.resultArr[x + y*(this.slice[0])]
+    },
+
+    draw: function(canvas, img, fitCanvasSize) {
+      let c = canvas;
+
+      if (fitCanvasSize) {
+        c.setAttribute("height", img.height)
+        c.setAttribute("width", img.width)
+      }
+      let ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+
+      let tileWidth = c.width / this.slice[0]
+      let tileHeight = c.height / this.slice[1]
+      for (let x = 0; x < this.slice[0]; x++) {
+        for (let y = 0; y < this.slice[1]; y++) {
+          let conf = this.getConfidence(x, y);
+          let xStart = tileWidth * x
+          let yStart = tileHeight * y
+          ctx.fillStyle="rgba(255, 0, 0, " + (1-conf) + ")"; // red stands for non-habitable
+          ctx.fillRect(xStart, yStart, tileWidth, tileHeight);
+        }
+      }
+    },
+
+    download: function() {
+      let img = new Image();
+
+      img.onload = (() => {
+        this.draw(this.$refs.full, img, true)
+        this.downloadCanvas(this.$refs.full)
+      }).bind(this)
+
+      img.src = this.imgUrl;
     }
+
+
   },
 
   computed: {
@@ -134,64 +140,32 @@ export default {
   asyncComputed: {
     resultBlob: function () {
       return (new Promise(function (resolve, reject) {
-        let load = function (){
-          let c = this.$refs.full;
-          c.setAttribute("height", img.height)
-          c.setAttribute("width", img.width)
-          let ctx = c.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          for (let x = 0; x < this.slice[0]; x++) {
-            for (let y = 0; y < this.slice[1]; y++) {
-              let conf = this.getConfidence(x, y);
-              let width = c.width / this.slice[0]
-              let height = c.height / this.slice[1]
-              let xStart = width * x
-              let yStart = height * y
-              ctx.fillStyle="rgba(255, 0, 0, " + (1-conf) + ")"; // red stands for non-habitable
-              ctx.fillRect(xStart, yStart, width, height);
-            }
-          }
+        let img = new Image();
+        img.onload = (() => {
+          this.draw(this.$refs.full, img, true)
 
+          //determine file Name
           let fName = this.img.file.name;
           fName = fName.replace(/\.[^/.]+$/, "");
           fName += "_masked.jpg";
 
-          c.toBlob(function(blob) {
+          // call resolve
+          this.$refs.full.toBlob(function(blob) {
             resolve({
               "blob": blob,
               "name": fName
             })
           }, "image/jpg")
-        }.bind(this)
+        }).bind(this)
 
-        let img = new Image();
-        img.onload = load
         img.src = this.imgUrl;
       }.bind(this)))
     }
   },
 
   mounted: function() {
-    let c = this.$refs.c;
-    let ctx = c.getContext("2d");
-
-    let draw = () => {
-      ctx.drawImage(img, 0, 0);
-      for (let x = 0; x < this.slice[0]; x++) {
-        for (let y = 0; y < this.slice[1]; y++) {
-          let conf = this.getConfidence(x, y);
-          let width = c.width / this.slice[0]
-          let height = c.height / this.slice[1]
-          let xStart = width * x
-          let yStart = height * y
-          ctx.fillStyle="rgba(255, 0, 0, " + (1-conf) + ")"; // red stands for non-habitable
-          ctx.fillRect(xStart, yStart, width, height);
-        }
-      }
-    }
-
-    let img = new Image(c.width, c.height);
-    img.onload = draw
+    let img = new Image();
+    img.onload = () => this.draw(this.$refs.c, img, false)
     img.src = this.imgUrl;
   }
 }
