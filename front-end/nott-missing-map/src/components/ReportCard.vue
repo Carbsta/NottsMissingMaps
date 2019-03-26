@@ -82,7 +82,7 @@ export default {
           let conf = this.getConfidence(x, y);
           let xStart = tileWidth * x
           let yStart = tileHeight * y
-          ctx.fillStyle="rgba(255, 0, 0, " + (1-conf) + ")"; // red stands for non-habitable
+          ctx.fillStyle="rgba(255, 0, 0, " + (1-conf)*.5 + ")"; // red stands for non-habitable
           ctx.fillRect(xStart, yStart, tileWidth, tileHeight);
         }
       }
