@@ -73,7 +73,7 @@
               <v-toolbar  floatting flat style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto" class="transparent">
                 <v-btn color="info" v-on:click="expend_all(true)">
                   <v-icon>unfold_more</v-icon>
-                  Expend All
+                  Expand All
                 </v-btn>
                 <v-btn color="info" v-on:click="expend_all(false)">
                   <v-icon>unfold_less</v-icon>
