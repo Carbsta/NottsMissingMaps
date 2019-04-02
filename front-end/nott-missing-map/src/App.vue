@@ -93,13 +93,38 @@
               </v-toolbar>
               <v-layout row wrap>
                 <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
-                  <ReportCard ref="report_card" :img="img" :imgs="imgs" :slice="slice"/>
+                  <ReportCard ref="report_card" :img="img" :imgs="imgs" :slice="slice" :previewImg="previewImg"/>
                 </v-flex>
               </v-layout>
               <br>
               <br>
               <br>
             </v-container>
+            <!-- popup in report page -->
+            <template>
+              <div class="text-xs-center">
+                <v-dialog v-model="previewImg.on" width="1000">
+                  <v-card  v-if="previewImg.on">
+                    <v-card-title class="headline grey lighten-2" primary-title>
+                      {{previewImg.img.file.name}}
+                    </v-card-title>
+
+                    <v-card-text ref="imgPrev">
+                      <ImgPreview :img="previewImg.img" :slice="slice"/>
+                    </v-card-text>
+
+                    <v-divider></v-divider>
+
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="primary" flat @click="previewImg.on = false">
+                        Close
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </div>
+            </template>
           </template>
         </v-layout>
       </v-content>
@@ -111,6 +136,7 @@
 import DragDropBox from './components/DragDropBox.vue'
 import PreviewCard from './components/PreviewCard.vue'
 import ReportCard from './components/ReportCard.vue'
+import ImgPreview from './components/ImgPreview.vue'
 import { saveAs } from 'file-saver'
 import axios from 'axios'
 import JSZip from 'jszip'
@@ -127,6 +153,7 @@ export default {
       uploading: false,
       slice: [2, 2],
       zipping: false,
+      previewImg: {img: undefined, on: false}
     }
   },
   methods: {
@@ -210,10 +237,15 @@ export default {
   computed:{
 
   },
+  mounted:function(){
+    // this.$refs.imgPrev.style.width = window.innerWidth;
+    // this.$refs.imgPrev.style.height = window.innerHeight;
+  },
   components: {
     DragDropBox,
     PreviewCard,
     ReportCard,
+    ImgPreview,
   }
 }
 </script>

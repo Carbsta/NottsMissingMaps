@@ -4,7 +4,7 @@
      <v-card>
        <v-card-title primary-title>
          <v-flex xs6>
-           <div ref="container" >
+           <div ref="container">
              <img :src="imgUrl" ref = "i" class="comparison-image">
              <canvas ref = "c"></canvas>
            </div>
@@ -22,7 +22,8 @@
            Download
          </v-btn>
          <v-spacer />
-         <v-btn flat color="primary" @click = "show = !show">
+         <v-btn flat color="primary" @click="previewImg.img = img; previewImg.on = true"> Preview </v-btn>
+         <v-btn flat color="primary" @click="show = !show">
            {{show ? "Collapse" : "Details"}}
          </v-btn>
        </v-card-actions>
@@ -45,7 +46,8 @@ export default {
   props: {
     img: Object,
     imgs: Array,
-    slice: Array
+    slice: Array,
+    previewImg: Object
   },
   data: function () {
     return {
@@ -166,7 +168,6 @@ export default {
   },
 
   mounted: function() {
-    console.log(this.$refs);
     let img = new Image();
     let updateSize = () => {
       this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
