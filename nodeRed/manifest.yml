@@ -1,6 +1,6 @@
 applications:
   - path: .
-    name: ForTestBranchNott
+    name: NottNodeRed
     environment_json: {}
     memory: 1024M
     instances: 1
