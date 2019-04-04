@@ -127,10 +127,10 @@ export default {
         ];
       } else {
         return [`Tags: `,
-          ].this.img.result.map(rslt => {
+          this.img.result.map(rslt => {
           let classifier = rslt.images[0].classifiers[0]
           return concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
-        }).reduce((acc, cur) => acc.concat(cur), [])
+        }).reduce((acc, cur) => acc.concat(cur), [])]
       }
     },
 
