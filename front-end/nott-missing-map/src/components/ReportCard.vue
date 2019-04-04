@@ -129,7 +129,7 @@ export default {
         return this.img.result.map(rslt => {
           let classifier = rslt.images[0].classifiers[0]
           return [
-            `classifier_id: ${classifier.classifier_id}`,
+            `${classifier.classifier_id}`,
           ].concat(classifier.classes.map(oneClass => `${oneClass.class}: \t ${oneClass.score}` +
             (oneClass.type_hierarchy ? ` from \t ${oneClass.type_hierarchy}` : "")))
         }).reduce((acc, cur) => acc.concat(cur), [])
