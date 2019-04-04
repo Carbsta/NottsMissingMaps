@@ -130,7 +130,7 @@ export default {
           let classifier = rslt.images[0].classifiers[0]
           let unique = [...new Set([].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`)))]
           return unique
-        }).filter.reduce((acc, cur) => acc.concat(cur), [])
+        }).reduce((acc, cur) => acc.concat(cur), [])
       }
     },
 
