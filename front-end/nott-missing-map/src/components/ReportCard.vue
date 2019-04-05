@@ -128,9 +128,9 @@ export default {
       } else {
         let unique = [...new Set([].concat(this.img.result.map(rslt => {
           let classifier = rslt.images[0].classifiers[0]
-          return [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`)).reduce((acc, cur) => acc.concat(cur), [])
+          return [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
         })))]
-        return unique
+        return unique.reduce((acc, cur) => acc.concat(cur), [])
       }
     },
 
