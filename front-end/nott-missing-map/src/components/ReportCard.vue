@@ -126,10 +126,12 @@ export default {
           `Type: ${this.img.file.type}\n`,
         ];
       } else {
-        let unique = [...new Set([`Tags: `].concat(this.img.result.map(rslt => {
-          let classifier = rslt.images[0].classifiers[0]
-          return [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
-        })))]
+        let classifier = rslt.images[0].classifiers[0]
+        let scores = classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`)
+        let tags = this.img.result.map(rslt => {
+          return [].concat(scores)
+        })
+        let unique = [...new Set([`Tags: `].concat(tags)]
         return unique.reduce((acc, cur) => acc.concat(cur), [])
       }
     },
