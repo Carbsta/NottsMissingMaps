@@ -12,24 +12,30 @@
          </v-flex>
          <v-spacer />
          <div>
-           <h3 class="headline mb-0" >{{img.file.name}}</h3>
+           <div class="title mb-0" >{{img.file.name}}</div>
+           <div class="text-truncate"> <!-- Some important info can be put here! -->
+            {{this.img.result.some(r => r.error) ? "Warning: Error(s) from backend!" : ""}}
+           </div>
          </div>
        </v-card-title>
 
 
        <v-card-actions>
-         <v-btn flat color="primary" v-on:click="download()">
+         <v-btn small flat color="primary" v-on:click="download()">
            Download
          </v-btn>
          <v-spacer />
-         <v-btn flat color="primary" @click="previewImg.img = img; previewImg.on = true"> Preview </v-btn>
-         <v-btn flat color="primary" @click="show = !show">
+         <v-btn small flat color="primary" @click="previewImg.img = img; previewImg.on = true"> Preview </v-btn>
+         <v-btn small flat color="primary" @click="show = !show">
            {{show ? "Collapse" : "Details"}}
          </v-btn>
        </v-card-actions>
        <v-slide-y-transition>
          <v-card-text v-show = "show">
-           <div v-for="n in reportInfo.length" :key="n" style="margin-bottom: 10px">{{reportInfo[n-1]}}</div>
+           <p v-for="n in reportInfo.length" :key="n" style="margin-bottom: 10px; text-align: left;" >
+             <!-- Probably it is not elegant / secure to write as following -->
+             <span v-html="(n != 1 ? '&nbsp;&nbsp;&nbsp;' : '') + reportInfo[n-1]"></span>
+           </p>
          </v-card-text>
        </v-slide-y-transition>
      </v-card>
@@ -69,10 +75,10 @@ export default {
       return this.resultArr[x + y*(this.slice[0])]
     },
 
-    draw: function(canvas, img, fitCanvasSize) {
+    draw: function(canvas, img, resizeCanvas) {
       let c = canvas;
 
-      if (fitCanvasSize) {
+      if (resizeCanvas) {
         c.setAttribute("height", img.height)
         c.setAttribute("width", img.width)
       }
@@ -118,15 +124,23 @@ export default {
 
     reportInfo: function() {
       // every line is an element in the returned list
-      if (this.img.result[0] === undefined) {
+      if (this.img.result === undefined || this.img.result[0] === undefined) {
         return [
           `Here should be the report details. Some random stuff here now`,
           `Name: ${this.img.file.name}`,
           `LastModifiedDate: ${this.img.file.lastModifiedDate}`,
           `Type: ${this.img.file.type}\n`,
         ];
+      } else if (this.img.result.some(r => r.error)) {
+        return [
+          `Some error happens in backend: `
+        ].concat(
+          this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`)
+        )
       } else {
+        console.log(this.img);
         let unique = [...new Set([`Tags: `].concat(this.img.result.map(rslt => {
+          console.log(rslt);
           let classifier = rslt.images[0].classifiers[0]
           return [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
         })))]
@@ -135,7 +149,7 @@ export default {
     },
 
     resultArr: function() {
-      return this.img.result.map(pitch => pitch.images[0].classifiers[0].classes[0].score)
+      return this.img.result.map(patch => patch.error ? 0 : patch.images[0].classifiers[0].classes[0].score)
     }
   },
 
@@ -168,6 +182,9 @@ export default {
   mounted: function() {
     let img = new Image();
     let updateSize = () => {
+      let cont = this.$refs.container;
+      let i = this.$refs.i;
+      cont.style.height = cont.clientWidth * i.naturalHeight / i.naturalWidth + "px";
       this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
       this.$refs.i.style.height = this.$refs.c.scrollHeight + "px"
     }

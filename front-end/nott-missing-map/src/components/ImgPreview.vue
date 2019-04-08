@@ -45,6 +45,18 @@ export default {
       }
     },
     updateSize: function() {
+      // let ratio = Math.min(window.innerWidth / img.naturalWidth, window.innerHeight / img.naturalHeight) * 0.8;
+      // img.width = img.naturalWidth * ratio;
+      // img.height = img.naturalHeight * ratio;
+
+
+      // let cont = this.$refs.container;
+      // let i = this.$refs.i;
+      // cont.style.height = cont.clientWidth * i.naturalHeight / i.naturalWidth + "px";
+      // this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
+      // this.$refs.i.style.height = this.$refs.c.scrollHeight + "px"
+
+
       this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
       this.$refs.i.style.height = this.$refs.c.scrollHeight + "px"
     }
@@ -64,12 +76,11 @@ export default {
     let img = new Image();
 
     img.onload = () => {
-      if (img.width > window.innerWidth * 0.7){
-        img.width = window.innerWidth * 0.7;
-      }
-      if (img.height > window.innerHeight * 0.7) {
-        img.height = window.innerHeight * 0.7;
-      }
+      let ratio = Math.min(window.innerWidth / img.naturalWidth, (window.innerHeight - 150) / img.naturalHeight) * 0.8;
+      img.width = img.naturalWidth * ratio;
+      img.height = img.naturalHeight * ratio;
+
+      console.log(img.width, img.height);
 
       this.draw(this.$refs.c, img, true)
 

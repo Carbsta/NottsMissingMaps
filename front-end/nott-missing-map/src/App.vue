@@ -6,39 +6,40 @@
 
           <!-- The top tool bar -->
           <v-card>
-            <v-toolbar fixed>
+            <v-toolbar fixed style="z-index: 999;">
               <v-btn icon v-on:click="goHome()">
                 <v-icon>home</v-icon>
               </v-btn>
               <v-toolbar-title>Missing Map</v-toolbar-title>
+
+              <!-- Alert window -->
+              <v-alert
+                dismissible
+                v-model="alert"
+                type="error"
+                icon="new_releases"
+                transition="scale-transition"
+                class="ml-5"
+              >
+                {{alertMsg}}
+              </v-alert>
+              <v-spacer></v-spacer>
             </v-toolbar>
           </v-card>
 
-          <v-flex xs12>  <!-- take the space of the floatting toolbar -->
-            <div style="height: 70px"> </div>
-          </v-flex>
+
 
           <!-- uploading page content -->
           <template v-if="uploadingPage">
+
+            <v-flex xs12>  <!-- take the space of the floatting toolbar -->
+              <div style="height: 70px"> </div>
+            </v-flex>
+
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
                 <DragDropBox :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
-              </v-flex>
-
-              <!-- Alert window -->
-              <v-flex>
-                <v-toolbar flat fixed class="transparent" style="left: 230px">
-                  <v-alert
-                    dismissible
-                    v-model="alert"
-                    type="error"
-                    icon="new_releases"
-                    transition="scale-transition"
-                  >
-                    {{alertMsg}}
-                  </v-alert>
-                </v-toolbar>
               </v-flex>
 
               <!-- Bottom submit button -->
@@ -105,8 +106,8 @@
               <div class="text-xs-center">
                 <v-dialog v-model="previewImg.on" width="1000">
                   <v-card  v-if="previewImg.on">
-                    <v-card-title class="headline grey lighten-2" primary-title>
-                      {{previewImg.img.file.name}}
+                    <v-card-title class="title grey lighten-2 pa-3" >
+                      {{previewImg.img.file.name}} <!-- Take the file name as the title of popup -->
                     </v-card-title>
 
                     <v-card-text ref="imgPrev">
@@ -117,7 +118,7 @@
 
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                      <v-btn color="primary" flat @click="previewImg.on = false">
+                      <v-btn small color="primary" flat @click="previewImg.on = false">
                         Close
                       </v-btn>
                     </v-card-actions>
@@ -175,9 +176,8 @@ export default {
 
         axios.post(postURL, formData, {
         // axios.get(getURL_test, formData, {
-          timeout:100000, // 100s
+          timeout:60000, // 60s
         }).then(function(res) {
-          console.log(res);
           let results = res.data
           if (results.length != this.imgs.length) {
             console.error("results.length != this.imgs.length, this should never happens.");
@@ -188,15 +188,23 @@ export default {
             for (let i = 0; i < results.length; i++)
               this.imgs[i].result = results[i];
           }
-
           // end of processing
-          this.uploading = false;
           this.uploadingPage = false; // switch page
+
+        }.bind(this)).catch(function(err) {
+          console.log([err]);
+          this.raiseAlert(err.message);
+
+        }.bind(this)).finally(function() {
+          this.uploading = false;
+          window.scroll(0,0)
+
         }.bind(this))
       } else {
         this.raiseAlert("No images to submit");
       }
     },
+
     raiseAlert: function (msg) {
       if (!this.alert) {
         this.alert = true;
@@ -204,8 +212,7 @@ export default {
       } else {
         this.alert = false;
         setTimeout(function() {
-          this.alert = true;
-          this.alertMsg = msg;
+          this.raiseAlert(msg);
         }.bind(this), 100)
       }
     },
@@ -229,17 +236,11 @@ export default {
           saveAs(b, "result.zip")
           this.zipping = false
         })
-
-
       })
     }
   },
   computed:{
 
-  },
-  mounted:function(){
-    // this.$refs.imgPrev.style.width = window.innerWidth;
-    // this.$refs.imgPrev.style.height = window.innerHeight;
   },
   components: {
     DragDropBox,
