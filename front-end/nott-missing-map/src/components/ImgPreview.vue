@@ -68,7 +68,7 @@ export default {
     },
 
     resultArr: function() {
-      return this.img.result.map(pitch => pitch.images[0].classifiers[0].classes[0].score)
+      return this.img.result.map(pitch => pitch.classes[0].score)
     }
   },
 
@@ -79,8 +79,6 @@ export default {
       let ratio = Math.min(window.innerWidth / img.naturalWidth, (window.innerHeight - 150) / img.naturalHeight) * 0.8;
       img.width = img.naturalWidth * ratio;
       img.height = img.naturalHeight * ratio;
-
-      console.log(img.width, img.height);
 
       this.draw(this.$refs.c, img, true)
 

@@ -138,10 +138,9 @@ export default {
           this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`)
         )
       } else {
-        console.log(this.img);
-        let unique = [...new Set([`Tags: `].concat(this.img.result.map(rslt => {
-          console.log(rslt);
-          let classifier = rslt.images[0].classifiers[0]
+        // console.log(this.img);
+        let unique = [...new Set([`Tags: `].concat(this.img.result.map(classifier => {
+          // console.log(classifier);
           return [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
         })))]
         return unique.reduce((acc, cur) => acc.concat(cur), [])
@@ -149,7 +148,7 @@ export default {
     },
 
     resultArr: function() {
-      return this.img.result.map(patch => patch.error ? 0 : patch.images[0].classifiers[0].classes[0].score)
+      return this.img.result.map(patch => patch.error ? 0 : patch.classes[0].score)
     }
   },
 
