@@ -39,7 +39,18 @@
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
-                <DragDropBox :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
+                <DragDropBox v-if="!uploading" :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
+                <v-progress-circular
+                  v-show="uploading"
+                  ref="progressC"
+                  :rotate="0"
+                  :size="100"
+                  :width="15"
+                  :value="percentage"
+                  color="primary"
+                >
+                  {{percentage}}
+                </v-progress-circular>
               </v-flex>
 
               <!-- Bottom submit button -->
@@ -139,9 +150,8 @@ import PreviewCard from './components/PreviewCard.vue'
 import ReportCard from './components/ReportCard.vue'
 import ImgPreview from './components/ImgPreview.vue'
 import { saveAs } from 'file-saver'
-import axios from 'axios'
 import JSZip from 'jszip'
-
+import upload from './functions/upload.js'
 
 export default {
   name: 'app',
@@ -152,54 +162,43 @@ export default {
       alert: false,
       alertMsg: "",
       uploading: false,
-      slice: [2, 2],
+      slice: [4, 4],
       zipping: false,
-      previewImg: {img: undefined, on: false}
+      previewImg: {img: undefined, on: false},
+      progress: {data:0, max: 0},
     }
   },
+
   methods: {
+
     submitImg: function (event) {
       if (this.imgs.length) {
         this.uploading = true;
         this.alert = false;
         this.alertMsg = "";
-
-        // eslint-disable-next-line
-        let postURL = "https://nottnodered.eu-gb.mybluemix.net/ts2"
-        // eslint-disable-next-line
-        let getURL_test = "https://nottnodered.eu-gb.mybluemix.net/sample_data?len=" + this.imgs.length
-
-        var formData = new FormData();
-        this.imgs.forEach(img => formData.append("images", img.file));
-        formData.set("xSlice", this.slice[0]);
-        formData.set("ySlice", this.slice[1]);
-
-        axios.post(postURL, formData, {
-        // axios.get(getURL_test, formData, {
-          timeout:60000, // 60s
-        }).then(function(res) {
-          let results = res.data
-          if (results.length != this.imgs.length) {
-            console.error("results.length != this.imgs.length, this should never happens.");
-            console.error(results)
-          } else if (!results.every(rslt => rslt.length == this.slice[0] * this.slice[1])) {
-            console.error("Number of slice doesn't match.");
-          } else {
-            for (let i = 0; i < results.length; i++)
-              this.imgs[i].result = results[i];
-          }
-          // end of processing
-          this.uploadingPage = false; // switch page
-
-        }.bind(this)).catch(function(err) {
-          console.log([err]);
+        this.progress = {
+          data: 0,
+          max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1]
+        };
+        Promise.all(this.imgs.map(img => {
+           return upload(this.slice[0], this.slice[1], img.file, this.progress, this.$refs.progressC)
+        }
+        ))
+        .then( res => {
+          console.log(res)
+          res.forEach((r, i) => {
+            this.imgs[i].result = r;
+          })
+        })
+        .catch(err => {
           this.raiseAlert(err.message);
-
-        }.bind(this)).finally(function() {
+          console.log([err])
+        })
+        .finally( () => {
+          this.uploadingPage = false; // switch page
           this.uploading = false;
           window.scroll(0,0)
-
-        }.bind(this))
+        })
       } else {
         this.raiseAlert("No images to submit");
       }
@@ -240,7 +239,9 @@ export default {
     }
   },
   computed:{
-
+    percentage: function () {
+      return parseInt( this.progress.data / this.progress.max * 100)
+    }
   },
   components: {
     DragDropBox,

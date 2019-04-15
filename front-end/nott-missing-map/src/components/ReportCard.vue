@@ -139,14 +139,12 @@ export default {
         )
       } else {
         console.log(this.img);
-        let unique = [(this.img.result.map(rslt => {
-          console.log(rslt);
-          let classifier = rslt.images[0].classifiers[0]
+        let unique = [(this.img.result.map(classifier => {
+          console.log(classifier);
           let tags = [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
           return tags
         }))].flat().flat()
-        let habScoreList = [(this.img.result.map(rslt => {
-          let classifier = rslt.images[0].classifiers[0]
+        let habScoreList = [(this.img.result.map(classifier => {
           let score = [].concat(classifier.classes.filter(oneClass => oneClass.class == "Buildings" || oneClass.class == "Dense Residential" || oneClass.class == "Sparse Residential" || oneClass.class == "Medium Residential").map(oneClass => `${oneClass.score}`))
           console.log(score);
           return score
@@ -159,7 +157,7 @@ export default {
     },
 
     resultArr: function() {
-      return this.img.result.map(patch => patch.error ? 0 : patch.images[0].classifiers[0].classes[0].score)
+      return this.img.result.map(patch => patch.error ? 0 : patch.classes[0].score)
     }
   },
 
