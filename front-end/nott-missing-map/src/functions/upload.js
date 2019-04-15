@@ -1,9 +1,5 @@
-// eslint-disable-next-line
 import axios from 'axios'
 import Jimp from 'jimp'
-// eslint-disable-next-line
-import Vue from 'vue'
-
 
 
 // The FileReader promise
@@ -13,30 +9,26 @@ const pFileReader = file => new Promise((res, rej) => {
   fr.readAsArrayBuffer(file)
 })
 
-function doubleRaf (callback) {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(callback)
+
+// Prevent "heavy work" of Jimp from frozing the browser
+// see https://github.com/vuejs/vue/issues/9200
+function  doubleRafPromise() {
+  return new Promise((res, rej) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => res())
+    })
   })
 }
 
 
-
 // Return a promise, which will resolve the result of segment and classfying
 // Promises chaining is used, for reference: https://javascript.info/promise-chaining
-export default (xSlice, ySlice, file, progress, comp) => {
+export default (xSlice, ySlice, file, progress) => {
   const mime = file.type;
   // eslint-disable-next-line
   const filename = file.name.replace(/\.[^/.]+$/, "")
   // eslint-disable-next-line
   const fileext  = /(?:\.([^.]+))?$/.exec(file.name)[1]
-
-  function  doubleRafPromise() {
-    return new Promise((res, rej) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => res())
-      })
-    })
-  }
 
   return new Promise((resolve, reject) => {
     pFileReader(file).then(buffer =>
@@ -46,13 +38,10 @@ export default (xSlice, ySlice, file, progress, comp) => {
       let h = im.bitmap.height / ySlice;  // the height of every patch
 
       let patchs = [];
-      progress.data += 1.0
-      console.log("out!!!, $forceUpdate called", JSON.stringify(progress));
 
       for (var y = 0; y < ySlice; y++) {
         for (var x = 0; x < xSlice; x++) {
           progress.data += 1.0
-          console.log(JSON.stringify(progress));
           await doubleRafPromise();
 
           patchs.push( im
@@ -63,7 +52,6 @@ export default (xSlice, ySlice, file, progress, comp) => {
           )
         }
       }
-      console.log(JSON.stringify(patchs));
       return Promise.all(patchs);
       //
       // progress.data += 1.0
@@ -123,11 +111,10 @@ export default (xSlice, ySlice, file, progress, comp) => {
     // })
 
     .then(patchs => {
-      return Promise.all(patchs.map(buf => {
+      return Promise.all(patchs.map((buf, i) => {
         const url = "https://gateway.watsonplatform.net/visual-recognition/api/v3/classify";
-
         let formData = new FormData();
-        formData.set("images_file",    new File([buf], filename, {type: file.type}));
+        formData.set("images_file",    new File([buf], `${filename}_${i}.${fileext}`, {type: file.type}));
         formData.set("classifier_ids", "LandCategory_931213784");
         formData.set("threshold",      0);
 
@@ -143,7 +130,6 @@ export default (xSlice, ySlice, file, progress, comp) => {
           // timeout:60000, // 60s
         }).then(res => {
           progress.data += 0.2
-          console.log(JSON.stringify(progress))
           return res
         })
       }))

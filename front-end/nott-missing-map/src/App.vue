@@ -41,15 +41,15 @@
               <v-flex>
                 <DragDropBox v-if="!uploading" :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
                 <v-progress-circular
-                  v-show="uploading"
-                  ref="progressC"
+                  v-else
                   :rotate="0"
-                  :size="100"
-                  :width="15"
+                  :size="200"
+                  :width="20"
                   :value="percentage"
                   color="primary"
+                  class="non-transition-progress-circular"
                 >
-                  {{percentage}}
+                  {{percentage}}%
                 </v-progress-circular>
               </v-flex>
 
@@ -181,11 +181,10 @@ export default {
           max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1]
         };
         Promise.all(this.imgs.map(img => {
-           return upload(this.slice[0], this.slice[1], img.file, this.progress, this.$refs.progressC)
+           return upload(this.slice[0], this.slice[1], img.file, this.progress)
         }
         ))
         .then( res => {
-          console.log(res)
           res.forEach((r, i) => {
             this.imgs[i].result = r;
           })
@@ -261,4 +260,15 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
 }
+
+.non-transition-progress-circular {
+  transition: none !important;
+  margin-top: 110px;
+}
+
+.non-transition-progress-circular *{
+  transition: none !important;
+  font-size: 34px;
+}
+
 </style>
