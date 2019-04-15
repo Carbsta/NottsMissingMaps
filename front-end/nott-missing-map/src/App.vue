@@ -28,7 +28,6 @@
           </v-card>
 
 
-
           <!-- uploading page content -->
           <template v-if="uploadingPage">
 
@@ -39,7 +38,11 @@
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
-                <DragDropBox v-if="!uploading" :files="imgs" :alert="raiseAlert" style="position:fixed; top:94px ;margin: 2%; width:45%"/>
+                <DragDropBox v-if="!uploading"
+                  :files="imgs"
+                  :alert="raiseAlert"
+                  style="position:fixed; top:94px ;margin: 2%; width:45%"
+                />
                 <v-progress-circular
                   v-else
                   :rotate="0"
@@ -82,7 +85,11 @@
           <!-- report page content -->
           <template v-else>
             <v-container fluid grid-list-xl>
-              <v-toolbar  floatting flat style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto" class="transparent">
+              <v-toolbar
+                floatting flat
+                style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto"
+                class="transparent"
+              >
                 <v-btn color="info" v-on:click="expand_all(true)">
                   <v-icon>unfold_more</v-icon>
                   Expand All
@@ -105,7 +112,13 @@
               </v-toolbar>
               <v-layout row wrap>
                 <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
-                  <ReportCard ref="report_card" :img="img" :imgs="imgs" :slice="slice" :previewImg="previewImg"/>
+                  <ReportCard
+                    ref="report_card"
+                    :img="img"
+                    :imgs="imgs"
+                    :slice="slice"
+                    :previewImg="previewImg"
+                  />
                 </v-flex>
               </v-layout>
               <br>
@@ -145,121 +158,118 @@
 </template>
 
 <script>
-import DragDropBox from './components/DragDropBox.vue'
-import PreviewCard from './components/PreviewCard.vue'
-import ReportCard from './components/ReportCard.vue'
-import ImgPreview from './components/ImgPreview.vue'
-import { saveAs } from 'file-saver'
-import JSZip from 'jszip'
-import upload from './functions/upload.js'
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import DragDropBox from './components/DragDropBox.vue';
+import PreviewCard from './components/PreviewCard.vue';
+import ReportCard from './components/ReportCard.vue';
+import ImgPreview from './components/ImgPreview.vue';
+import upload from './functions/upload';
 
 export default {
   name: 'app',
-  data: function(){
+  data() {
     return {
       uploadingPage: true,
       imgs: [],
       alert: false,
-      alertMsg: "",
+      alertMsg: '',
       uploading: false,
       slice: [4, 4],
       zipping: false,
-      previewImg: {img: undefined, on: false},
-      progress: {data:0, max: 0},
-    }
+      previewImg: { img: undefined, on: false },
+      progress: { data: 0, max: 0 },
+    };
   },
 
   methods: {
     // Submit button handler
-    submitImg: function (event) {
+    submitImg(event) {
       if (this.imgs.length) {
         this.uploading = true;
         this.alert = false;
-        this.alertMsg = "";
+        this.alertMsg = '';
         this.progress = {
           // Init progress to 0
           data: 0,
           // 1 for image processing and 0.2 for querying API
-          max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1]
+          max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1],
         };
-        Promise.all(this.imgs.map(img => {
-           return upload(this.slice[0], this.slice[1], img.file, this.progress)
-        }
-        ))
-        .then( res => {
+        Promise.all(this.imgs.map(
+          img => upload(this.slice[0], this.slice[1], img.file, this.progress),
+        )).then((res) => {
           res.forEach((r, i) => {
             this.imgs[i].result = r;
-          })
-        })
-        .catch(err => {
+          });
+        }).catch((err) => {
           this.raiseAlert(err.message);
-          console.log([err])
-        })
-        .finally( () => {
+          console.log([err]);
+        }).finally(() => {
           this.uploadingPage = false; // switch page
           this.uploading = false;
-          window.scroll(0,0) // go to the top
-        })
+          window.scroll(0, 0); // go to the top
+        });
       } else {
-        this.raiseAlert("No images to submit");
+        this.raiseAlert('No images to submit');
       }
     },
 
     // Show an error massage on the top toolbar
-    raiseAlert: function (msg) {
+    raiseAlert(msg) {
       if (!this.alert) {
         this.alert = true;
         this.alertMsg = msg;
       } else {
         // If there is already an error message, give it 100ms to shrink out
         this.alert = false;
-        setTimeout(function() {
-          this.raiseAlert(msg);
-        }.bind(this), 100)
+        setTimeout(() => this.raiseAlert(msg), 100);
       }
     },
 
     // Top left home button handler
-    goHome: function() {
-      this.uploadingPage = true
-      this.imgs = []
+    goHome() {
+      this.uploadingPage = true;
+      this.imgs = [];
     },
 
     // EXPAND ALL and COLLAPSE ALL button (expand=false for collapse)
-    expand_all: function (expand) {
-      [...this.$refs.report_card].forEach(function(child) {child.show = expand})
+    expand_all(expand) {
+      [...this.$refs.report_card].forEach((child) => {
+        // eslint-disable-next-line
+        child.show = expand;
+      });
     },
 
     // DOWNLOAD ALL button handler
-    download_all: function () {
-      this.zipping = true
-      var zip = new JSZip();
-      let promiseBlob = [...this.$refs.report_card]
-        .map(card => card.resultBlob)
-      Promise.all(promiseBlob).then(blobs => {
-        blobs.forEach(x => zip.file(x.name, x.blob))
+    download_all() {
+      this.zipping = true;
+      const zip = new JSZip();
+      const promiseBlob = [...this.$refs.report_card]
+        .map(card => card.resultBlob);
+      Promise.all(promiseBlob).then((blobs) => {
+        blobs.forEach(x => zip.file(x.name, x.blob));
 
         // Generate zip file
-        zip.generateAsync({type : "blob"}).then(b => {
-          saveAs(b, "result.zip")
-          this.zipping = false
-        })
-      })
-    }
+        zip.generateAsync({ type: 'blob' }).then((b) => {
+          saveAs(b, 'result.zip');
+          this.zipping = false;
+        });
+      });
+    },
   },
-  computed:{
+  computed: {
     // Get the percentage of progress
-    percentage: function () {
-      return parseInt( this.progress.data / this.progress.max * 100)
-    }
+    percentage() {
+      return Math.floor(this.progress.data / this.progress.max * 100);
+    },
   },
   components: {
     DragDropBox,
     PreviewCard,
     ReportCard,
     ImgPreview,
-  }
-}
+  },
+};
 </script>
 
 <style>

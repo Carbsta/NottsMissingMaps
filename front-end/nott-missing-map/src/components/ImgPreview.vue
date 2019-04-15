@@ -23,22 +23,22 @@ export default {
     },
 
     draw: function(canvas, img, fitCanvasSize) {
-      let c = canvas;
+      const c = canvas;
 
       if (fitCanvasSize) {
         c.setAttribute("height", img.height)
         c.setAttribute("width", img.width)
       }
-      let ctx = c.getContext("2d");
+      const ctx = c.getContext("2d");
       ctx.drawImage(img, 0, 0, c.width, c.height);
 
-      let tileWidth = c.width / this.slice[0]
-      let tileHeight = c.height / this.slice[1]
+      const tileWidth = c.width / this.slice[0]
+      const tileHeight = c.height / this.slice[1]
       for (let x = 0; x < this.slice[0]; x++) {
         for (let y = 0; y < this.slice[1]; y++) {
-          let conf = this.getConfidence(x, y);
-          let xStart = tileWidth * x
-          let yStart = tileHeight * y
+          const conf = this.getConfidence(x, y);
+          const xStart = tileWidth * x
+          const yStart = tileHeight * y
           ctx.fillStyle="rgba(255, 0, 0, " + (conf)*.5 + ")"; // red stands for non-habitable
           ctx.fillRect(xStart, yStart, tileWidth, tileHeight);
         }
@@ -61,10 +61,10 @@ export default {
   },
 
   mounted: function() {
-    let img = new Image();
+    const img = new Image();
 
     img.onload = () => {
-      let ratio = Math.min(window.innerWidth / img.naturalWidth, (window.innerHeight - 150) / img.naturalHeight) * 0.8;
+      const ratio = Math.min(window.innerWidth / img.naturalWidth, (window.innerHeight - 150) / img.naturalHeight) * 0.8;
       img.width = img.naturalWidth * ratio;
       img.height = img.naturalHeight * ratio;
 

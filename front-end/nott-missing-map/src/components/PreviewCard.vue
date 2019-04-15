@@ -46,11 +46,11 @@ export default {
 
   computed: {
     fileSize: function() {
-        let kb = this.img.file.size / 1024
+        const kb = this.img.file.size / 1024
         if (kb < 100) {
             return kb.toFixed(2) + " KB"
         } else {
-            let mb = kb / 1024
+            const mb = kb / 1024
             return mb.toFixed(2) + " MB"
         }
     },
