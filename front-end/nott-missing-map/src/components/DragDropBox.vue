@@ -22,11 +22,7 @@ export default {
     }
   },
   mounted: function() {
-
-    // TODO: !!!
-    // Vue.use(Vuetify, { options: { customProperties: true } })
-
-    var div = document.createElement('div');
+    const div = document.createElement('div');
 
     this.dragAndDropCapable = ( ( 'draggable' in div )
       || ( 'ondragstart' in div && 'ondrop' in div ) )
@@ -35,7 +31,7 @@ export default {
 
     // console.log("dragAndDropCapable is " + this.dragAndDropCapable);
 
-    let fileInput = this.$refs.fileform.querySelector( 'input[type="file"]' )
+    const fileInput = this.$refs.fileform.querySelector( 'input[type="file"]' )
     fileInput.addEventListener( 'change', function(e)  {
       this.addFiles(fileInput.files)
       this.$refs.fileform.reset()
@@ -53,7 +49,7 @@ export default {
         this.addFiles(e.dataTransfer.files)
       }.bind(this));
 
-      let dragoverClasses = ["is-dragover",]
+      const dragoverClasses = ["is-dragover",]
       // drag over
       this.$refs.fileform.addEventListener('dragover', function(e){
         dragoverClasses.forEach(className =>
@@ -75,10 +71,10 @@ export default {
   methods: {
     dismissFile: function(fileName) { return },
     addFiles: function(files) {
-      let fileArr = this.files;
+      const fileArr = this.files;
       files = [...files];
-      let filtered = files.filter(file => file.type.split("/")[0] == 'image')
-      let invalidFile = files.length - filtered.length;
+      const filtered = files.filter(file => file.type.split("/")[0] == 'image')
+      const invalidFile = files.length - filtered.length;
       if (invalidFile)
         this.alert(invalidFile + " of " + files.length + " file(s) are invalid and ignored!");
       filtered.forEach(file => fileArr.push({file:file, result: {}}))
