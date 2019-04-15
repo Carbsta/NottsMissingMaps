@@ -83,11 +83,11 @@
           <template v-else>
             <v-container fluid grid-list-xl>
               <v-toolbar  floatting flat style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto" class="transparent">
-                <v-btn color="info" v-on:click="expend_all(true)">
+                <v-btn color="info" v-on:click="expand_all(true)">
                   <v-icon>unfold_more</v-icon>
                   Expand All
                 </v-btn>
-                <v-btn color="info" v-on:click="expend_all(false)">
+                <v-btn color="info" v-on:click="expand_all(false)">
                   <v-icon>unfold_less</v-icon>
                   Collapse All
                 </v-btn>
@@ -170,14 +170,16 @@ export default {
   },
 
   methods: {
-
+    // Submit button handler
     submitImg: function (event) {
       if (this.imgs.length) {
         this.uploading = true;
         this.alert = false;
         this.alertMsg = "";
         this.progress = {
+          // Init progress to 0
           data: 0,
+          // 1 for image processing and 0.2 for querying API
           max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1]
         };
         Promise.all(this.imgs.map(img => {
@@ -196,31 +198,39 @@ export default {
         .finally( () => {
           this.uploadingPage = false; // switch page
           this.uploading = false;
-          window.scroll(0,0)
+          window.scroll(0,0) // go to the top
         })
       } else {
         this.raiseAlert("No images to submit");
       }
     },
 
+    // Show an error massage on the top toolbar
     raiseAlert: function (msg) {
       if (!this.alert) {
         this.alert = true;
         this.alertMsg = msg;
       } else {
+        // If there is already an error message, give it 100ms to shrink out
         this.alert = false;
         setTimeout(function() {
           this.raiseAlert(msg);
         }.bind(this), 100)
       }
     },
+
+    // Top left home button handler
     goHome: function() {
       this.uploadingPage = true
       this.imgs = []
     },
-    expend_all: function (expend) {
-      [...this.$refs.report_card].forEach(function(child) {child.show = expend})
+
+    // EXPAND ALL and COLLAPSE ALL button (expand=false for collapse)
+    expand_all: function (expand) {
+      [...this.$refs.report_card].forEach(function(child) {child.show = expand})
     },
+
+    // DOWNLOAD ALL button handler
     download_all: function () {
       this.zipping = true
       var zip = new JSZip();
@@ -238,6 +248,7 @@ export default {
     }
   },
   computed:{
+    // Get the percentage of progress
     percentage: function () {
       return parseInt( this.progress.data / this.progress.max * 100)
     }
@@ -261,14 +272,17 @@ export default {
   margin-top: 60px;
 }
 
+/* Avoid transition as we only have a flash to update the screen
+** See functions/upload.js for more details */
 .non-transition-progress-circular {
   transition: none !important;
   margin-top: 110px;
 }
 
+/* All sub element of .non-transition-progress-circular should avoid transition */
 .non-transition-progress-circular *{
   transition: none !important;
-  font-size: 34px;
+  font-size: 34px; /* The font size of number at the centre of progress-circular */
 }
 
 </style>

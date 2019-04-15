@@ -61,6 +61,7 @@ export default {
     }
   },
   methods:{
+    // A helper function: download the given canvas element as image file
     downloadCanvas: function (canvas) {
       let fName = this.img.file.name;
       fName = fName.replace(/\.[^/.]+$/, "");
@@ -75,6 +76,10 @@ export default {
       return this.resultArr[x + y*(this.slice[0])]
     },
 
+    // Draw the given Image html element on canvas
+    //   canvas: the canvas element to draw on
+    //   img: the DOM Image object
+    //   resizeCanvas: resize the size of canvas according to size of img
     draw: function(canvas, img, resizeCanvas) {
       let c = canvas;
 
@@ -98,6 +103,7 @@ export default {
       }
     },
 
+    // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
     download: function() {
       let img = new Image();
 
@@ -108,8 +114,6 @@ export default {
 
       img.src = this.imgUrl;
     }
-
-
   },
 
   computed: {
@@ -118,10 +122,12 @@ export default {
         return kb < 100 ? (kb.toFixed(2) + " KB") : ((kb / 1024).toFixed(2) + " MB")
     },
 
+    // The local url of image of this ReportCard
     imgUrl: function () {
       return window.URL.createObjectURL(this.img.file)
     },
 
+    // The infomation shown when the card is expanded
     reportInfo: function() {
       // every line is an element in the returned list
       if (this.img.result === undefined || this.img.result[0] === undefined) {
@@ -147,12 +153,14 @@ export default {
       }
     },
 
+    // The array of scores of every patch, used for calculate confidence
     resultArr: function() {
       return this.img.result.map(patch => patch.error ? 0 : patch.classes[0].score)
     }
   },
 
   asyncComputed: {
+    // The blob data of masked image. Used for bulk downloading
     resultBlob: function () {
       return (new Promise(function (resolve, reject) {
         let img = new Image();
@@ -178,6 +186,7 @@ export default {
     }
   },
 
+  // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted: function() {
     let img = new Image();
     let updateSize = () => {
@@ -221,7 +230,7 @@ canvas {
 
 @import 'ImageComparison.css';
 
-/* Some modification */
+/* Some modification: opacity of slide bar when not focused */
 .comparison-separator, .comparison-control {
   opacity: 0.5;
 }

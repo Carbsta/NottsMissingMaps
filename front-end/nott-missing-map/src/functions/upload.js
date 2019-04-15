@@ -25,15 +25,15 @@ function  doubleRafPromise() {
 // Promises chaining is used, for reference: https://javascript.info/promise-chaining
 export default (xSlice, ySlice, file, progress) => {
   const mime = file.type;
-  // eslint-disable-next-line
   const filename = file.name.replace(/\.[^/.]+$/, "")
-  // eslint-disable-next-line
   const fileext  = /(?:\.([^.]+))?$/.exec(file.name)[1]
 
   return new Promise((resolve, reject) => {
     pFileReader(file).then(buffer =>
       Jimp.read(buffer) // return the Jimp instance
-    ).then(async im => {
+    )
+    // Then process the images
+    .then(async im => {
       let w = im.bitmap.width / xSlice;   // the width of every patch
       let h = im.bitmap.height / ySlice;  // the height of every patch
 
@@ -53,63 +53,8 @@ export default (xSlice, ySlice, file, progress) => {
         }
       }
       return Promise.all(patchs);
-      //
-      // progress.data += 1.0
-      // console.log(JSON.stringify(progress));
-      // im
-      //   .clone()
-      //   .crop(w*1, h*1, w, h )
-      //   //.getBase64Async(mime)    // get data URI
-      //   .getBufferAsync(mime) // get buffer
-      //   .then(res => {
-      //     progress.data += 1.0
-      //     console.log(JSON.stringify(progress));
-      //     im
-      //       .clone()
-      //       .crop(w*1, h*2, w, h )
-      //       //.getBase64Async(mime)    // get data URI
-      //       .getBufferAsync(mime) // get buffer
-      //       .then (res2 => {
-      //
-      //       })
-      //   })
-      //
     })
-    // .then(patchs => {
-    //   let postURL = "https://fortestbranchnott.eu-gb.mybluemix.net/api"
-    //
-    //   return Promise.all(patchs.map(p => {
-    //     // let formData = new FormData();
-    //     // formData.append("image", p)
-    //
-    //     const readable = new Readable()
-    //     readable._read = () => {}
-    //     readable.push(p)
-    //     readable.push(null)
-    //
-    //
-    //     console.log(p);
-    //     return axios.post(postURL, {image: readable}, {
-    //       timeout:60000, // 60s
-    //     })
-    //   }))
-    // })
-
-    // .then(patchs => {
-    //   let visualRecognition = new VisualRecognitionV3({
-    //     version: '2018-03-19',
-    //     iam_apikey: 'qvKuhx-TfYJj4CF4z3935Y7niTKANlK-7HJNLF46ddg9'
-    //   });
-    //   return Promise.all(patchs.map(buf => {
-    //     let params = {
-    //       images_file: buf
-    //     }
-    //     return new Promise((res, rej) => {
-    //       visualRecognition.classify(params, (err, r) => err ? rej(err) : res(r))
-    //     })
-    //   }))
-    // })
-
+    // Then query the API
     .then(patchs => {
       return Promise.all(patchs.map((buf, i) => {
         const url = "https://gateway.watsonplatform.net/visual-recognition/api/v3/classify";
@@ -127,13 +72,14 @@ export default (xSlice, ySlice, file, progress) => {
             username: 'apikey',
             password: 'qvKuhx-TfYJj4CF4z3935Y7niTKANlK-7HJNLF46ddg9'
           },
-          // timeout:60000, // 60s
+          // timeout:60000, // add timeout limit if needed
         }).then(res => {
           progress.data += 0.2
           return res
         })
       }))
     })
+    // Then filter the response data
     .then(ress =>
       ress.map(res => res.data.images[0].classifiers[0])
     )
