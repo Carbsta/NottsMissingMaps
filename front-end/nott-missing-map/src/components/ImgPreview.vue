@@ -45,18 +45,6 @@ export default {
       }
     },
     updateSize: function() {
-      // let ratio = Math.min(window.innerWidth / img.naturalWidth, window.innerHeight / img.naturalHeight) * 0.8;
-      // img.width = img.naturalWidth * ratio;
-      // img.height = img.naturalHeight * ratio;
-
-
-      // let cont = this.$refs.container;
-      // let i = this.$refs.i;
-      // cont.style.height = cont.clientWidth * i.naturalHeight / i.naturalWidth + "px";
-      // this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
-      // this.$refs.i.style.height = this.$refs.c.scrollHeight + "px"
-
-
       this.$refs.i.style.width = this.$refs.c.scrollWidth + "px"
       this.$refs.i.style.height = this.$refs.c.scrollHeight + "px"
     }
