@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Jimp from 'jimp';
-
+import { VisualRecognition as vrCfg } from '@src/config';
 
 // The FileReader promise
 const pFileReader = file => new Promise((res, rej) => {
@@ -59,15 +59,15 @@ export default (xSlice, ySlice, file, progress) => {
         const url = 'https://gateway.watsonplatform.net/visual-recognition/api/v3/classify';
         const formData = new FormData();
         formData.set('images_file', new File([buf], `${filename}_${i}.${fileext}`, { type: file.type }));
-        formData.set('classifier_ids', 'LandCategory_931213784');
+        formData.set('classifier_ids', vrCfg.modelID);
         formData.set('threshold', 0);
 
         return axios.post(url, formData, {
-          params: { version: '2018-03-19' },
+          params: { version: vrCfg.version },
           headers: { 'Accept-Language': 'en' },
           auth: {
             username: 'apikey',
-            password: 'qvKuhx-TfYJj4CF4z3935Y7niTKANlK-7HJNLF46ddg9',
+            password: vrCfg.APIkey,
           },
           // timeout:60000, // add timeout limit if needed
         }).then((res) => {
