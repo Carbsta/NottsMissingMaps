@@ -31,34 +31,29 @@ export default {
   props: {
     img: Object,
     imgs: Array,
-    uploading: Boolean
+    uploading: Boolean,
   },
 
-  methods:{
-    dismiss: function() {
-      for (let i = 0; i < this.imgs.length; i++) {
+  methods: {
+    dismiss() {
+      for (let i = 0; i < this.imgs.length; i += 1) {
         if (this.imgs[i].file === this.img.file) {
-          this.imgs.splice(i, 1)
+          this.imgs.splice(i, 1);
         }
       }
     },
   },
 
   computed: {
-    fileSize: function() {
-        let kb = this.img.file.size / 1024
-        if (kb < 100) {
-            return kb.toFixed(2) + " KB"
-        } else {
-            let mb = kb / 1024
-            return mb.toFixed(2) + " MB"
-        }
+    fileSize() {
+      const kb = this.img.file.size / 1024;
+      return kb < 100 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
     },
-    imgUrl: function () {
-      return window.URL.createObjectURL(this.img.file)
+    imgUrl() {
+      return window.URL.createObjectURL(this.img.file);
     },
-  }
-}
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
