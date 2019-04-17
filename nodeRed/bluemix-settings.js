@@ -63,7 +63,7 @@ var settings = module.exports = {
         imageSizeModule: require('image-size'),
         dataUriToBufferModule: require("data-uri-to-buffer")
     },
-
+    
     httpNodeCors: { origin: "*", methods: ['GET','PUT','POST','DELETE'] },
 
     // Configure the logging output
@@ -90,7 +90,7 @@ var settings = module.exports = {
 // Look for the attached Cloudant instance to use for storage
 settings.couchAppname = appEnv.name;
 // NODE_RED_STORAGE_NAME is automatically set by this applications manifest.
-var storageServiceName = /* process.env.NODE_RED_STORAGE_NAME || */ new RegExp("^"+settings.couchAppname+".cloudantNoSQLDB");
+var storageServiceName = process.env.NODE_RED_STORAGE_NAME || new RegExp("^"+settings.couchAppname+".cloudantNoSQLDB");
 var couchService = appEnv.getService(storageServiceName);
 
 if (!couchService) {
