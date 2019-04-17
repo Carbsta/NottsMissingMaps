@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import Vuetify from 'vuetify';
-import 'vuetify/dist/vuetify.min.css'; // Ensure you are using css-loader
+import Vuetify from 'vuetify/lib';
+import 'vuetify/src/stylus/app.styl';
 import AsyncComputed from 'vue-async-computed';
 import App from './App.vue';
 
