@@ -1,6 +1,6 @@
 /.metadata/
 .idea
-manual-classifier/out
+out
 *.class
 .classpath
 .project
