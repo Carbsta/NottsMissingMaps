@@ -74,6 +74,9 @@ export default {
     img.src = this.imgUrl;
     window.addEventListener('resize', this.updateSize);
   },
+  destroyed() {
+    window.removeEventListener('resize', this.updateSize);
+  },
 };
 </script>
 

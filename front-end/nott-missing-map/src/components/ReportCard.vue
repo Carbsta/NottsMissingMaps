@@ -93,6 +93,13 @@ export default {
 
       img.src = this.imgUrl;
     },
+    updateSize() {
+      const cont = this.$refs.container;
+      const { i } = this.$refs;
+      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
+      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
+      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
+    },
   },
 
   computed: {
@@ -172,13 +179,7 @@ export default {
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
     const img = new Image();
-    const updateSize = () => {
-      const cont = this.$refs.container;
-      const { i } = this.$refs;
-      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
-      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
-      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
-    };
+
     img.onload = () => {
       drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
 
@@ -197,10 +198,13 @@ export default {
           },
         ],
       });
-      updateSize();
+      this.updateSize();
     };
     img.src = this.imgUrl;
-    window.addEventListener('resize', e => updateSize());
+    window.addEventListener('resize', this.updateSize);
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.updateSize);
   },
 };
 </script>
