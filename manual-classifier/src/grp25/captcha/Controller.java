@@ -17,9 +17,15 @@ import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 
 import javax.imageio.ImageIO;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * The controller class for the FXML.
+ */
 public class Controller {
     @FXML
     StackPane gridContainer;
@@ -27,13 +33,17 @@ public class Controller {
     @FXML
     GridPane grid;
 
-    @FXML Label sourceLabel, targetLabel, imgIdx, imgTotal, xSlicesLabel, ySlicesLabel;
+    @FXML
+    Label sourceLabel, targetLabel, imgIdx, imgTotal, xSlicesLabel, ySlicesLabel;
 
-    @FXML Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, startWithHabBtn, endBtn, segmentBtn, allHab, allNon;
+    @FXML
+    Button sourceBtn, targetBtn, prevBtn, nextBtn, startBtn, startWithHabBtn, endBtn, segmentBtn, allHab, allNon;
 
-    @FXML ToggleButton useFlatten, diffDir;
+    @FXML
+    ToggleButton useFlatten, diffDir;
 
-    @FXML Slider xSlicesSlider, ySlicesSlider;
+    @FXML
+    Slider xSlicesSlider, ySlicesSlider;
 
     private IntegerProperty imgIdxProperty;
     private IntegerProperty totalImgProperty;
@@ -41,7 +51,9 @@ public class Controller {
     private IntegerProperty colsProperty;
     private ArrayList<ImgWithTag> imgsWithTags;
 
-
+    /**
+     * Bind a bunch of properties at the beginning of our program.
+     */
     public void initialize() {
         BooleanProperty bp = ClassifierManager.getInstance().startedProperty();
         totalImgProperty = ClassifierManager.getInstance().totalImgProperty();
@@ -104,25 +116,35 @@ public class Controller {
         ySlicesSlider.disableProperty().bind(bp);
     }
 
-    public void chooseSource (ActionEvent e) {
+    /**
+     * Handler for the choose source folder button.
+     */
+    public void chooseSource() {
         File f;
-        if (null != (f = folderChooser(e))) {
+        if (null != (f = folderChooser())) {
             ClassifierManager.getInstance().setSource(f);
             sourceLabel.setText(f.getAbsolutePath());
             sourceLabel.setVisible(true);
         }
     }
 
-    public void chooseTarget (ActionEvent e) {
+    /**
+     * Handler for the choose target folder button.
+     */
+    public void chooseTarget() {
         File f;
-        if (null != (f = folderChooser(e))) {
+        if (null != (f = folderChooser())) {
             ClassifierManager.getInstance().setTarget(f);
             targetLabel.setText(f.getAbsolutePath());
             targetLabel.setVisible(true);
         }
     }
 
-    public void onStart () {
+    /**
+     * Handler for the start button (start classifying).
+     * All patches of all images will be initially set as non-inhabitable.
+     */
+    public void onStart() {
         if (sourceLabel.isVisible() && targetLabel.isVisible()) {
             ClassifierManager.getInstance().startedProperty().setValue(true);
         } else {
@@ -132,31 +154,54 @@ public class Controller {
         }
     }
 
+    /**
+     * Handler for the "START with all Hab" button (start classifying).
+     * All patches of all images will be initially set as inhabitable.
+     */
     public void onStartWithHab() {
         ClassifierManager.getInstance().setDefaultHab(true);
         onStart();
     }
 
+    /**
+     * Handler for end classifying and export the result.
+     */
     public void onEnd() {
         ClassifierManager.getInstance().save();
     }
 
+    /**
+     * Handler for the "just segment" button.
+     * This will just segment images in source folder and export the result.
+     */
     public void onSegment() {
-        onStart ();
+        onStart();
         if (ClassifierManager.getInstance().startedProperty().get())
             ClassifierManager.getInstance().saveSegment();
     }
 
+    /**
+     * Set the tags of all the patches of current image.
+     *
+     * @param e the action event. We recognize the button pressed (set all hab
+     *          or set all non-hab) through this and respond differently.
+     */
     public void setAll(ActionEvent e) {
         imgsWithTags.get(imgIdxProperty.get()).setAll(
                 ((Button) e.getSource()).getText().equals("set all hab"));
         render();
     }
 
+    /**
+     * Set current image to previous image in the image array.
+     */
     public void prevImg() {
         imgIdxProperty.set(imgIdxProperty.get() - 1);
     }
 
+    /**
+     * Set current image to next image in the image array.
+     */
     public void nextImg() {
         imgIdxProperty.set(imgIdxProperty.get() + 1);
     }
@@ -186,7 +231,22 @@ public class Controller {
         }
     }
 
+    private File folderChooser() {
+        DirectoryChooser fc = new DirectoryChooser();
+        return fc.showDialog(null);
+    }
+
+    /**
+     * The image patch class. It can be clicked and its tag will be flipped.
+     */
     class ImagePatch extends StackPane {
+        /**
+         * The constructor of image patch.
+         *
+         * @param it  The {@link ImgWithTag} data.
+         * @param row The row index of this patch.
+         * @param col The column index of this patch.
+         */
         ImagePatch(ImgWithTag it, int row, int col) {
             super();
             ImageView iv = new ImageView();
@@ -209,11 +269,5 @@ public class Controller {
                 e.printStackTrace();
             }
         }
-    }
-
-
-    private File folderChooser (ActionEvent e) {
-        DirectoryChooser fc = new DirectoryChooser();
-        return fc.showDialog(null);
     }
 }
