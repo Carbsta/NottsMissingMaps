@@ -7,7 +7,7 @@
           <!-- The top tool bar -->
           <v-card>
             <v-toolbar fixed style="z-index: 999;">
-              <v-btn icon v-on:click="goHome()">
+              <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
               <v-toolbar-title>Missing Map</v-toolbar-title>
@@ -232,8 +232,12 @@ export default {
 
     // Top left home button handler
     goHome() {
-      this.uploadingPage = true;
       this.imgs = [];
+      this.previewImg.img = undefined;
+      this.previewImg.on = false;
+      setTimeout(() => {
+        this.uploadingPage = true;
+      }, 10);
     },
 
     // EXPAND ALL and COLLAPSE ALL button (expand=false for collapse)
