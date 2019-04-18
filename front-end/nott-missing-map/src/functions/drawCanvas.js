@@ -5,7 +5,7 @@ import { maxOpacity } from '@src/config';
 // params:
 //   canvas: the canvas DOM element to draw on
 //   img: the img DON element which is the base of drawing
-//   sliceNum: define the how many slices will be divides to in x / y axis
+//   sliceNum: define many slices will be divides to in x / y axis
 //   confidence: a function return confidence between 0 to 1
 export default (canvas, img, sliceNum, confidence) => {
   const c = canvas;
