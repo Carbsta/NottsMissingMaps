@@ -23,7 +23,7 @@ function doubleRafPromise() {
 
 // Return a promise, which will resolve the result of segment and classfying
 // Promises chaining is used, for reference: https://javascript.info/promise-chaining
-export default (xSlice, ySlice, file, progress) => {
+export default (slice, file, progress) => {
   const mime = file.type;
   const filename = file.name.replace(/\.[^/.]+$/, '');
   const fileext = /(?:\.([^.]+))?$/.exec(file.name)[1];
@@ -35,13 +35,13 @@ export default (xSlice, ySlice, file, progress) => {
 
     // Then process the images
       .then(async (im) => {
-        const w = im.bitmap.width / xSlice; // the width of every patch
-        const h = im.bitmap.height / ySlice; // the height of every patch
+        const w = im.bitmap.width / slice.x; // the width of every patch
+        const h = im.bitmap.height / slice.y; // the height of every patch
 
         const patchs = [];
 
-        for (let y = 0; y < ySlice; y += 1) {
-          for (let x = 0; x < xSlice; x += 1) {
+        for (let y = 0; y < slice.y; y += 1) {
+          for (let x = 0; x < slice.x; x += 1) {
             progress.data += 1.0; // eslint-disable-line no-param-reassign
             await doubleRafPromise(); // eslint-disable-line no-await-in-loop
 

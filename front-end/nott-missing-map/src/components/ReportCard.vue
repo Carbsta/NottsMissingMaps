@@ -49,13 +49,14 @@
 <script>
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
+import drawCanvas from '@src/functions/drawCanvas';
 
 export default {
   name: 'ReportCard',
   props: {
     img: Object,
     imgs: Array,
-    slice: Array,
+    slice: Object,
     previewImg: Object,
   },
   data() {
@@ -76,34 +77,7 @@ export default {
     },
 
     getConfidence(x, y) {
-      return this.resultArr[x + y * this.slice[0]];
-    },
-
-    // Draw the given Image html element on canvas
-    //   canvas: the canvas element to draw on
-    //   img: the DOM Image object
-    //   resizeCanvas: resize the size of canvas according to size of img
-    draw(canvas, img, resizeCanvas) {
-      const c = canvas;
-
-      if (resizeCanvas) {
-        c.setAttribute('height', img.height);
-        c.setAttribute('width', img.width);
-      }
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-
-      const tileWidth = c.width / this.slice[0];
-      const tileHeight = c.height / this.slice[1];
-      for (let x = 0; x < this.slice[0]; x += 1) {
-        for (let y = 0; y < this.slice[1]; y += 1) {
-          const conf = this.getConfidence(x, y);
-          const xStart = tileWidth * x;
-          const yStart = tileHeight * y;
-          ctx.fillStyle = `rgba(255, 0, 0, ${conf * 0.5})`; // red stands for non-habitable
-          ctx.fillRect(xStart, yStart, tileWidth, tileHeight);
-        }
-      }
+      return this.resultArr[x + y * this.slice.x];
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
@@ -111,7 +85,9 @@ export default {
       const img = new Image();
 
       img.onload = () => {
-        this.draw(this.$refs.full, img, true);
+        this.$refs.full.setAttribute('height', img.height);
+        this.$refs.full.setAttribute('width', img.width);
+        drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
         this.downloadCanvas(this.$refs.full);
       };
 
@@ -170,7 +146,9 @@ export default {
       return new Promise((resolve, reject) => { // TODO: check if need extra bind
         const img = new Image();
         img.onload = (() => {
-          this.draw(this.$refs.full, img, true);
+          this.$refs.full.setAttribute('height', img.height);
+          this.$refs.full.setAttribute('width', img.width);
+          drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
 
           // determine file Name
           let fName = this.img.file.name;
@@ -202,7 +180,7 @@ export default {
       this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
     };
     img.onload = () => {
-      this.draw(this.$refs.c, img, false);
+      drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
 
       // eslint-disable-next-line
       new ImageComparison({

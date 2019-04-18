@@ -116,7 +116,7 @@
                     ref="report_card"
                     :img="img"
                     :imgs="imgs"
-                    :slice="slice"
+                    :slice="$options.sliceNum"
                     :previewImg="previewImg"
                   />
                 </v-flex>
@@ -134,11 +134,11 @@
                       {{previewImg.img.file.name}} <!-- Take the file name as the title of popup -->
                     </v-card-title>
 
-                    <v-card-text ref="imgPrev">
-                      <ImgPreview :img="previewImg.img" :slice="slice"/>
+                    <v-card-text>
+                      <ImgPreview :img="previewImg.img" :slice="$options.sliceNum"/>
                     </v-card-text>
 
-                    <v-divider></v-divider>
+                    <v-divider></v-divider> <!-- align the close button right  -->
 
                     <v-card-actions>
                       <v-spacer></v-spacer>
@@ -160,6 +160,7 @@
 <script>
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { sliceNum } from '@src/config';
 import DragDropBox from './components/DragDropBox.vue';
 import PreviewCard from './components/PreviewCard.vue';
 import ReportCard from './components/ReportCard.vue';
@@ -175,12 +176,15 @@ export default {
       alert: false,
       alertMsg: '',
       uploading: false,
-      slice: [4, 4],
       zipping: false,
       previewImg: { img: undefined, on: false },
       progress: { data: 0, max: 0 },
     };
   },
+
+  // See http://tinyurl.com/yxvd2kzt
+  // Can be accessed in template as $options.sliceNum
+  sliceNum,
 
   methods: {
     // Submit button handler
@@ -193,10 +197,10 @@ export default {
           // Init progress to 0
           data: 0,
           // 1 for image processing and 0.2 for querying API
-          max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1],
+          max: 1.2 * this.imgs.length * sliceNum.x * sliceNum.y,
         };
         Promise.all(this.imgs.map(
-          img => upload(this.slice[0], this.slice[1], img.file, this.progress),
+          img => upload(sliceNum, img.file, this.progress),
         )).then((res) => {
           res.forEach((r, i) => {
             this.imgs[i].result = r;

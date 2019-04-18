@@ -3,5 +3,10 @@
     "version": "2018-03-19",
     "APIkey": "qvKuhx-TfYJj4CF4z3935Y7niTKANlK-7HJNLF46ddg9",
     "modelID": "LandCategory_931213784"
-  }
+  },
+  "sliceNum": {
+    "x": 4,
+    "y": 4
+  },
+  "maxOpacity": 0.5
 }
