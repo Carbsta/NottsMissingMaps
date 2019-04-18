@@ -95,7 +95,7 @@ class ClassifierManager {
                 non.mkdirs();
                 for (int y = 0; y < rows.get(); y++) {
                     for (int x = 0; x < cols.get(); x++) {
-                        BufferedImage i = it.getPitch(y, x);
+                        BufferedImage i = it.getPatch(y, x);
                         String name = original_file_name + "-" + x + " " + y + "." + it.getType();
                         if (((Binary) (it.getTag(y, x))) == HABITABLE) {
                             ImageIO.write(i, it.getType(), new File(hab, name));
@@ -130,7 +130,7 @@ class ClassifierManager {
 
                 for (int y = 0; y < rows.get(); y++) {
                     for (int x = 0; x < cols.get(); x++) {
-                        BufferedImage i = it.getPitch(y, x);
+                        BufferedImage i = it.getPatch(y, x);
                         ImageIO.write(i, it.getType(), new File(curr, original_file_name + "-" + x + " " + y + "." + it.getType()));
                     }
                 }

@@ -192,7 +192,7 @@ public class Controller {
             ImageView iv = new ImageView();
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(it.getPitch(row, col), it.getType(), baos);
+                ImageIO.write(it.getPatch(row, col), it.getType(), baos);
                 iv.setImage(new Image(new ByteArrayInputStream(baos.toByteArray())));
                 iv.setFitHeight(700d / colsProperty.get());
                 iv.setPreserveRatio(true);

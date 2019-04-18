@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"grp25.captcha"},{"l":"grp25.captcha.tag"}]
