@@ -6,7 +6,7 @@
           <v-flex xs6>
             <div ref="container">
               <img :src="imgUrl" ref = "i" class="comparison-image">
-              <canvas ref = "c"></canvas>
+              <canvas ref = "c" class="with-mask"></canvas>
             </div>
             <canvas ref = "full" style="display: none"></canvas>
           </v-flex>
@@ -228,13 +228,13 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
-canvas {
+<style scoped>
+.with-mask {
   width: 100%;
   height: 100%;
 }
 
-@import 'ImageComparison.css';
+@import '~image-comparison/src/ImageComparison.css';
 
 /* Some modification: opacity of slide bar when not focused */
 .comparison-separator, .comparison-control {
