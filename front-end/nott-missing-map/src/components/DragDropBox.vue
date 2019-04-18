@@ -20,16 +20,11 @@
 </template>
 
 <script>
-// import Vue from 'vue'
-// import vuetify from 'Vuetify'
 export default {
   name: 'DragDropBox',
   props: { files: Array, alert: Function },
-  data() {
-    return {
-      dragAndDropCapable: false,
-    };
-  },
+
+  // Add multiple event listener after the component mounting
   mounted() {
     const div = document.createElement('div');
 
@@ -45,6 +40,7 @@ export default {
     });
 
     if (this.dragAndDropCapable) {
+      // remove default activitier
       ['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach((evt) => {
         this.$refs.fileform.addEventListener(evt, (e) => {
           e.preventDefault();
@@ -52,19 +48,20 @@ export default {
         }, false);
       });
 
+      // add file to memory when drop
       this.$refs.fileform.addEventListener('drop', (e) => {
         this.addFiles(e.dataTransfer.files);
       });
 
+      // add some visual response when draging over
       const dragoverClasses = ['is-dragover'];
-      // drag over
       this.$refs.fileform.addEventListener('dragover', (e) => {
         dragoverClasses.forEach(
           className => this.$refs.fileform.classList.add(className),
         );
       });
 
-      // leave
+      // add some visual response (reverse) after draging over
       ['dragend', 'dragleave', 'drop'].forEach((evt) => {
         this.$refs.fileform.addEventListener(evt, (e) => {
           dragoverClasses.forEach(
@@ -88,8 +85,8 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+
+<style scoped> /* "scoped" attribute: limit CSS to this component only */
 .box {
   height:500px;
   outline: 2px dashed #BDBDBD;
