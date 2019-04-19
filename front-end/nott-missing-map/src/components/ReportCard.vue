@@ -144,9 +144,17 @@ export default {
           let classifier = rslt.images[0].classifiers[0]
           let tags = [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
           return tags
-        }))]
-        let uniqueSet = [`Tags: `].concat([...new Set(unique.flat().flat())])
-        return uniqueSet
+        }))].flat().flat()
+        let habScoreList = [(this.img.result.map(rslt => {
+          let classifier = rslt.images[0].classifiers[0]
+          let score = [].concat(classifier.classes.filter(oneClass => oneClass.class == "Buildings" || oneClass.class == "Dense Residential" || oneClass.class == "Sparse Residential" || oneClass.class == "Medium Residential").map(oneClass => `${oneClass.score}`))
+          console.log(score);
+          return score
+        }))].flat().flat()
+        let habScore = Math.max.apply(Math, habScoreList)
+        console.log(habScore);
+        let report = [`Habitation Score: ` + habScore, `Tags: `].concat([...new Set(unique)])
+        return report
       }
     },
 
