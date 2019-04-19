@@ -48,6 +48,7 @@
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
+import { inhabitableClasses } from '@src/config';
 
 export default {
   name: 'ReportCard',
@@ -75,7 +76,7 @@ export default {
     },
 
     getConfidence(x, y) {
-      return this.resultArr[x + y * this.slice.x];
+      return this.confidenceArr[x + y * this.slice.x];
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
@@ -130,31 +131,34 @@ export default {
         );
       }
 
-      console.log(this.img);
-      const unique = [(this.img.result.map((classifier) => {
-        console.log(classifier);
-        const tags = [].concat(classifier.classes
-          .filter(oneClass => oneClass.score > 0.5)
-          .map(oneClass => `${oneClass.class}`));
-        return tags;
-      }))].flat().flat();
-      const habScoreList = [(this.img.result.map((classifier) => {
-        const score = [].concat(classifier.classes.filter(
-          oneClass => oneClass.class === 'Buildings'
-            || oneClass.class === 'Dense Residential'
-            || oneClass.class === 'Sparse Residential'
-            || oneClass.class === 'Medium Residential',
-        ).map(oneClass => `${oneClass.score}`));
-        console.log(score);
-        return score;
-      }))].flat().flat();
-      const habScore = Math.max(...habScoreList);
-      return [`Habitation Score: ${habScore}`, 'Tags: '].concat([...new Set(unique)]);
+      console.log(this.img.result);
+      const toBeUnique = this.img.result
+        .map(segment => segment.classes)
+        .flat()
+        .filter(oneClass => oneClass.score > 0.5)
+        .map(oneClass => oneClass.class);
+      console.log(toBeUnique);
+
+      const inhabitableScoreList = this.img.result
+        .map(segment => segment.classes)
+        .flat()
+        .filter(oneClass => inhabitableClasses.includes(oneClass.class))
+        .map(oneClass => oneClass.score);
+
+      console.log(inhabitableScoreList);
+
+      const habScore = Math.max(...inhabitableScoreList);
+      return [`Habitation Score: ${habScore}`, 'Tags: '].concat([...new Set(toBeUnique)]);
     },
 
-    // The array of scores of every patch, used for calculate confidence
-    resultArr() {
-      return this.img.result.map(patch => (patch.error ? 0 : patch.classes[0].score));
+    // The array of scores of every segment (highest one among inhabitable classes)
+    confidenceArr() {
+      return this.img.result.map((segment) => {
+        if (segment.error) return 0;
+        return Math.max(...segment.classes
+          .filter(oneClass => inhabitableClasses.includes(oneClass.class))
+          .map(oneClass => oneClass.score));
+      });
     },
   },
 

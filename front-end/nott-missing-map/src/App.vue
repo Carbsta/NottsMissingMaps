@@ -34,7 +34,8 @@
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
-                <DragDropBox class="upload-box" v-if="!uploading" :files="imgs" :alert="raiseAlert"/>
+                <DragDropBox v-if="!uploading"
+                  :files="imgs" :alert="raiseAlert" class="upload-box" />
                 <v-progress-circular
                   v-else
                   :rotate="0"
