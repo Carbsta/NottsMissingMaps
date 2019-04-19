@@ -149,13 +149,26 @@ export default {
         );
       }
 
-      // normal case
-      const unique = [...new Set(['Tags: '].concat(this.img.result.map(
-        classifier => [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(
-          oneClass => `${oneClass.class}`,
-        )),
-      )))];
-      return unique.reduce((acc, cur) => acc.concat(cur), []);
+      console.log(this.img);
+      const unique = [(this.img.result.map((classifier) => {
+        console.log(classifier);
+        const tags = [].concat(classifier.classes
+          .filter(oneClass => oneClass.score > 0.5)
+          .map(oneClass => `${oneClass.class}`));
+        return tags;
+      }))].flat().flat();
+      const habScoreList = [(this.img.result.map((classifier) => {
+        const score = [].concat(classifier.classes.filter(
+          oneClass => oneClass.class === 'Buildings'
+            || oneClass.class === 'Dense Residential'
+            || oneClass.class === 'Sparse Residential'
+            || oneClass.class === 'Medium Residential',
+        ).map(oneClass => `${oneClass.score}`));
+        console.log(score);
+        return score;
+      }))].flat().flat();
+      const habScore = Math.max(...habScoreList);
+      return [`Habitation Score: ${habScore}`, 'Tags: '].concat([...new Set(unique)]);
     },
 
     // The array of scores of every patch, used for calculate confidence
