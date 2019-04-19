@@ -10,7 +10,7 @@
               <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
-              <v-toolbar-title>Missing Map</v-toolbar-title>
+              <v-toolbar-title>Missing Maps</v-toolbar-title>
 
               <!-- Alert window -->
               <v-alert
