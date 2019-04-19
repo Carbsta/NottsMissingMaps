@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"grp25.captcha.tag","l":"Binary"},{"p":"grp25.captcha","l":"ClassifierManager"},{"p":"grp25.captcha","l":"Controller"},{"p":"grp25.captcha","l":"Controller.ImagePatch"},{"p":"grp25.captcha","l":"ImgWithTag"},{"p":"grp25.captcha","l":"Main"},{"p":"grp25.captcha.tag","l":"Tag"}]
