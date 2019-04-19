@@ -8,6 +8,7 @@
 <script>
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
+import { inhabitableClasses } from '@src/config';
 
 export default {
   name: 'ImgPreview',
@@ -20,7 +21,6 @@ export default {
   },
   methods: {
     getConfidence(x, y) {
-      console.log(this.resultArr[x + y * this.slice.x]);
       return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 

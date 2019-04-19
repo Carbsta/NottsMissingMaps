@@ -75,7 +75,6 @@ export default {
     },
 
     getConfidence(x, y) {
-      console.log(this.resultArr[x + y * this.slice.x]);
       return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 

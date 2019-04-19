@@ -8,5 +8,6 @@
     "x": 4,
     "y": 4
   },
-  "maxOpacity": 0.5
+  "maxOpacity": 0.5,
+  "inhabitableClasses": ["Buildings", "Dense Residential", "Sparse Residential", "Medium Residential"]
 }
