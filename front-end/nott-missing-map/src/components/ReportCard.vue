@@ -150,20 +150,25 @@ export default {
       }
 
       console.log(this.img);
-      let unique = [(this.img.result.map(classifier => {
+      const unique = [(this.img.result.map((classifier) => {
         console.log(classifier);
-        let tags = [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(oneClass => `${oneClass.class}`))
-        return tags
-      }))].flat().flat()
-      let habScoreList = [(this.img.result.map(classifier => {
-        let score = [].concat(classifier.classes.filter(oneClass => oneClass.class == "Buildings" || oneClass.class == "Dense Residential" || oneClass.class == "Sparse Residential" || oneClass.class == "Medium Residential").map(oneClass => `${oneClass.score}`))
+        const tags = [].concat(classifier.classes
+          .filter(oneClass => oneClass.score > 0.5)
+          .map(oneClass => `${oneClass.class}`));
+        return tags;
+      }))].flat().flat();
+      const habScoreList = [(this.img.result.map((classifier) => {
+        const score = [].concat(classifier.classes.filter(
+          oneClass => oneClass.class === 'Buildings'
+            || oneClass.class === 'Dense Residential'
+            || oneClass.class === 'Sparse Residential'
+            || oneClass.class === 'Medium Residential',
+        ).map(oneClass => `${oneClass.score}`));
         console.log(score);
-        return score
-      }))].flat().flat()
-      let habScore = Math.max.apply(Math, habScoreList)
-      console.log(habScore);
-      let report = [`Habitation Score: ` + habScore, `Tags: `].concat([...new Set(unique)])
-      return report
+        return score;
+      }))].flat().flat();
+      const habScore = Math.max(...habScoreList);
+      return [`Habitation Score: ${habScore}`, 'Tags: '].concat([...new Set(unique)]);
     },
 
     // The array of scores of every patch, used for calculate confidence
