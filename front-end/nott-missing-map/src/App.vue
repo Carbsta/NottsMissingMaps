@@ -34,11 +34,7 @@
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
-                <DragDropBox v-if="!uploading"
-                  :files="imgs"
-                  :alert="raiseAlert"
-                  style="position:fixed; top:94px ;margin: 2%; width:45%"
-                />
+                <DragDropBox class="upload-box" v-if="!uploading" :files="imgs" :alert="raiseAlert"/>
                 <v-progress-circular
                   v-else
                   :rotate="0"
@@ -55,9 +51,9 @@
               <!-- Bottom submit button -->
               <v-flex>
                 <v-btn
-                  class="text-none"
+                  class="text-none submit-btn"
                   color="primary"
-                  fixed style="margin:2%; bottom:0px; left:0px"
+                  fixed
                   v-on:click="submitImg"
                   :loading="uploading"
                 >
@@ -81,11 +77,19 @@
           <!-- report page content -->
           <template v-else>
             <v-container fluid grid-list-xl>
-              <v-toolbar
-                floatting flat
-                style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto"
-                class="transparent"
-              >
+              <v-layout row wrap>
+                <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
+                  <ReportCard
+                    ref="report_card"
+                    :img="img"
+                    :imgs="imgs"
+                    :slice="$options.sliceNum"
+                    :previewImg="previewImg"
+                  />
+                </v-flex>
+              </v-layout>
+
+              <v-toolbar floatting flat class="transparent bottom-toolbar">
                 <v-btn color="info" v-on:click="expand_all(true)">
                   <v-icon>unfold_more</v-icon>
                   Expand All
@@ -106,17 +110,6 @@
                   </template>
                 </v-btn>
               </v-toolbar>
-              <v-layout row wrap>
-                <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
-                  <ReportCard
-                    ref="report_card"
-                    :img="img"
-                    :imgs="imgs"
-                    :slice="$options.sliceNum"
-                    :previewImg="previewImg"
-                  />
-                </v-flex>
-              </v-layout>
               <br>
               <br>
               <br>
@@ -296,6 +289,30 @@ export default {
 .non-transition-progress-circular *{
   transition: none !important;
   font-size: 34px; /* The font size of number at the centre of progress-circular */
+}
+
+/* The drag drop box on uploading page */
+.upload-box {
+  position: fixed;
+  top: 94px;
+  margin: 2%;
+  width: 45%
+}
+
+/* The submit button on uploading page */
+.submit-btn {
+  margin: 2%;
+  bottom: 0px;
+  left :0px;
+}
+
+/* The bottom toolbar on report page */
+.bottom-toolbar {
+  position: fixed;
+  z-index: 2;
+  left: 30px;
+  bottom: 30px;
+  width: auto;
 }
 
 </style>

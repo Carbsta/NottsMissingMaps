@@ -8,7 +8,7 @@
               <img :src="imgUrl" ref = "i" class="comparison-image">
               <canvas ref = "c" class="with-mask"></canvas>
             </div>
-            <canvas ref = "full" style="display: none"></canvas>
+            <canvas ref = "full" id="full"></canvas>
           </v-flex>
           <v-spacer />
           <div>
@@ -33,9 +33,7 @@
         </v-card-actions>
         <v-slide-y-transition>
           <v-card-text v-show = "show">
-            <p v-for="n in reportInfo.length" :key="n"
-              style="margin-bottom: 10px; text-align: left;"
-            >
+            <p v-for="n in reportInfo.length" :key="n" class="report-details">
               <!-- Probably it is not elegant / secure to write as following -->
               <span v-html="(n != 1 ? '&nbsp;&nbsp;&nbsp;' : '') + reportInfo[n-1]"></span>
             </p>
@@ -214,6 +212,14 @@ export default {
 .with-mask {
   width: 100%;
   height: 100%;
+}
+
+#full {
+  display: none;
+}
+.report-details {
+  margin-bottom: 10px;
+  text-align: left;
 }
 
 @import '~image-comparison/src/ImageComparison.css';
