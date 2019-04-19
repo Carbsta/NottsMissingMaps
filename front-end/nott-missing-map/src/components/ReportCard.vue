@@ -14,7 +14,7 @@
           <div>
             <div class="title mb-0" >{{img.file.name}}</div>
             <div class="text-truncate"> <!-- Some important info can be put here! -->
-              {{this.img.result.some(r => r.error) ? "Warning: Error(s) from backend!" : ""}}
+              {{this.img.result.some(r => r.error) ? "Warning: Error(s) from backend!" : this.reportInfo[0]}}
             </div>
           </div>
         </v-card-title>
