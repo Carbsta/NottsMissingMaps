@@ -6,7 +6,7 @@
 
           <!-- The top tool bar -->
           <v-card>
-            <v-toolbar fixed style="z-index: 999;">
+            <v-toolbar app fixed style="z-index: 999;">
               <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
@@ -30,10 +30,6 @@
 
           <!-- uploading page content -->
           <template v-if="uploadingPage">
-
-            <v-flex xs12>  <!-- take the space of the floatting toolbar -->
-              <div style="height: 70px"> </div>
-            </v-flex>
 
             <!-- drag drop box -->
             <v-flex xs6>
@@ -287,7 +283,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 
 /* Avoid transition as we only have a flash to update the screen
