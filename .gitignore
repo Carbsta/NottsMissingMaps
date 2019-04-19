@@ -75,3 +75,7 @@ $RECYCLE.BIN/
 # IntelliJ
 .idea
 manual-classifier/out
+.class
+.classpath
+.project
+

@@ -18,6 +18,9 @@ import static grp25.captcha.tag.Binary.HABITABLE;
 import static grp25.captcha.tag.Binary.NON_HABITABLE;
 import static java.lang.System.exit;
 
+/**
+ * The manager of our app. It uses singleton.
+ */
 class ClassifierManager {
 
     private static ClassifierManager instance;
@@ -33,6 +36,7 @@ class ClassifierManager {
 
     private ArrayList<ImgWithTag> imgsWithTags = new ArrayList<>();
 
+    // The flatten feature is currently not implemented
     private boolean useFlatten = false, diffDir = true, defaultHab = false;
 
     private ClassifierManager() {
@@ -43,6 +47,9 @@ class ClassifierManager {
         });
     }
 
+    /**
+     * The initialization function which calls the private constructor.
+     */
     static void init() {
         if (instance == null) instance = new ClassifierManager();
     }
@@ -76,6 +83,9 @@ class ClassifierManager {
         }
     }
 
+    /**
+     * Save segmented images (patches) to target folder.
+     */
     void save() {
         try {
             File out = makeFolder();
@@ -87,7 +97,9 @@ class ClassifierManager {
                 if (diffDir) {
                     curr = new File(out, original_file_name);
                     curr.mkdirs();
-                } else { curr = out; }
+                } else {
+                    curr = out;
+                }
 
                 File hab = new File(curr, "hab");
                 hab.mkdirs();
@@ -95,7 +107,7 @@ class ClassifierManager {
                 non.mkdirs();
                 for (int y = 0; y < rows.get(); y++) {
                     for (int x = 0; x < cols.get(); x++) {
-                        BufferedImage i = it.getPitch(y, x);
+                        BufferedImage i = it.getPatch(y, x);
                         String name = original_file_name + "-" + x + " " + y + "." + it.getType();
                         if (((Binary) (it.getTag(y, x))) == HABITABLE) {
                             ImageIO.write(i, it.getType(), new File(hab, name));
@@ -116,6 +128,9 @@ class ClassifierManager {
         }
     }
 
+    /**
+     * Save image segments (without classifying) to the target folder.
+     */
     void saveSegment() {
         try {
             File out = makeFolder();
@@ -126,11 +141,13 @@ class ClassifierManager {
                 if (diffDir) {
                     curr = new File(out, original_file_name);
                     curr.mkdirs();
-                } else { curr = out; }
+                } else {
+                    curr = out;
+                }
 
                 for (int y = 0; y < rows.get(); y++) {
                     for (int x = 0; x < cols.get(); x++) {
-                        BufferedImage i = it.getPitch(y, x);
+                        BufferedImage i = it.getPatch(y, x);
                         ImageIO.write(i, it.getType(), new File(curr, original_file_name + "-" + x + " " + y + "." + it.getType()));
                     }
                 }
@@ -154,7 +171,6 @@ class ClassifierManager {
 
     void setSource(File source) {
         this.source = source;
-
     }
 
     void setTarget(File target) {
@@ -162,7 +178,7 @@ class ClassifierManager {
     }
 
 
-    public ArrayList<ImgWithTag> getImgsWithTags() {
+    ArrayList<ImgWithTag> getImgsWithTags() {
         return imgsWithTags;
     }
 
