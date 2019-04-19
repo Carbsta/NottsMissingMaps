@@ -131,23 +131,13 @@ export default {
         );
       }
 
-      console.log(this.img.result);
       const toBeUnique = this.img.result
         .map(segment => segment.classes)
         .flat()
         .filter(oneClass => oneClass.score > 0.5)
         .map(oneClass => oneClass.class);
-      console.log(toBeUnique);
 
-      const inhabitableScoreList = this.img.result
-        .map(segment => segment.classes)
-        .flat()
-        .filter(oneClass => inhabitableClasses.includes(oneClass.class))
-        .map(oneClass => oneClass.score);
-
-      console.log(inhabitableScoreList);
-
-      const habScore = Math.max(...inhabitableScoreList);
+      const habScore = Math.max(this.confidenceArr);
       return [`Habitation Score: ${habScore}`, 'Tags: '].concat([...new Set(toBeUnique)]);
     },
 

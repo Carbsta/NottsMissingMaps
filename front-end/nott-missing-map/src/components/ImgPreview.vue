@@ -8,6 +8,7 @@
 <script>
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
+import { inhabitableClasses } from '@src/config';
 
 export default {
   name: 'ImgPreview',
@@ -20,7 +21,7 @@ export default {
   },
   methods: {
     getConfidence(x, y) {
-      return this.resultArr[x + y * (this.slice.x)];
+      return this.confidenceArr[x + y * (this.slice.x)];
     },
 
     updateSize() {
@@ -34,8 +35,14 @@ export default {
       return window.URL.createObjectURL(this.img.file);
     },
 
-    resultArr() {
-      return this.img.result.map(pitch => pitch.classes[0].score);
+    // The array of scores of every segment (highest one among inhabitable classes)
+    confidenceArr() {
+      return this.img.result.map((segment) => {
+        if (segment.error) return 0;
+        return Math.max(...segment.classes
+          .filter(oneClass => inhabitableClasses.includes(oneClass.class))
+          .map(oneClass => oneClass.score));
+      });
     },
   },
 
