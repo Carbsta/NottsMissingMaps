@@ -1,4 +1,5 @@
-var path = require('path')
+var path = require('path');
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
 module.exports = {
   publicPath: './',
   configureWebpack: {
@@ -7,5 +8,8 @@ module.exports = {
         '@src': path.resolve(__dirname, 'src')
       }
     },
+    plugins: [
+      new VuetifyLoaderPlugin()
+    ],
   }
 }

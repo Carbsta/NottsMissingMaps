@@ -6,9 +6,9 @@
           <v-flex xs6>
             <div ref="container">
               <img :src="imgUrl" ref = "i" class="comparison-image">
-              <canvas ref = "c"></canvas>
+              <canvas ref = "c" class="with-mask"></canvas>
             </div>
-            <canvas ref = "full" style="display: none"></canvas>
+            <canvas ref = "full" id="full"></canvas>
           </v-flex>
           <v-spacer />
           <div>
@@ -33,9 +33,7 @@
         </v-card-actions>
         <v-slide-y-transition>
           <v-card-text v-show = "show">
-            <p v-for="n in reportInfo.length" :key="n"
-              style="margin-bottom: 10px; text-align: left;"
-            >
+            <p v-for="n in reportInfo.length" :key="n" class="report-details">
               <!-- Probably it is not elegant / secure to write as following -->
               <span v-html="(n != 1 ? '&nbsp;&nbsp;&nbsp;' : '') + reportInfo[n-1]"></span>
             </p>
@@ -49,13 +47,14 @@
 <script>
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
+import drawCanvas from '@src/functions/drawCanvas';
 
 export default {
   name: 'ReportCard',
   props: {
     img: Object,
     imgs: Array,
-    slice: Array,
+    slice: Object,
     previewImg: Object,
   },
   data() {
@@ -76,34 +75,7 @@ export default {
     },
 
     getConfidence(x, y) {
-      return this.resultArr[x + y * this.slice[0]];
-    },
-
-    // Draw the given Image html element on canvas
-    //   canvas: the canvas element to draw on
-    //   img: the DOM Image object
-    //   resizeCanvas: resize the size of canvas according to size of img
-    draw(canvas, img, resizeCanvas) {
-      const c = canvas;
-
-      if (resizeCanvas) {
-        c.setAttribute('height', img.height);
-        c.setAttribute('width', img.width);
-      }
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-
-      const tileWidth = c.width / this.slice[0];
-      const tileHeight = c.height / this.slice[1];
-      for (let x = 0; x < this.slice[0]; x += 1) {
-        for (let y = 0; y < this.slice[1]; y += 1) {
-          const conf = this.getConfidence(x, y);
-          const xStart = tileWidth * x;
-          const yStart = tileHeight * y;
-          ctx.fillStyle = `rgba(255, 0, 0, ${conf * 0.5})`; // red stands for non-habitable
-          ctx.fillRect(xStart, yStart, tileWidth, tileHeight);
-        }
-      }
+      return this.resultArr[x + y * this.slice.x];
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
@@ -111,11 +83,20 @@ export default {
       const img = new Image();
 
       img.onload = () => {
-        this.draw(this.$refs.full, img, true);
+        this.$refs.full.setAttribute('height', img.height);
+        this.$refs.full.setAttribute('width', img.width);
+        drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
         this.downloadCanvas(this.$refs.full);
       };
 
       img.src = this.imgUrl;
+    },
+    updateSize() {
+      const cont = this.$refs.container;
+      const { i } = this.$refs;
+      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
+      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
+      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
     },
   },
 
@@ -183,7 +164,9 @@ export default {
       return new Promise((resolve, reject) => { // TODO: check if need extra bind
         const img = new Image();
         img.onload = (() => {
-          this.draw(this.$refs.full, img, true);
+          this.$refs.full.setAttribute('height', img.height);
+          this.$refs.full.setAttribute('width', img.width);
+          drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
 
           // determine file Name
           let fName = this.img.file.name;
@@ -207,15 +190,9 @@ export default {
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
     const img = new Image();
-    const updateSize = () => {
-      const cont = this.$refs.container;
-      const { i } = this.$refs;
-      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
-      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
-      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
-    };
+
     img.onload = () => {
-      this.draw(this.$refs.c, img, false);
+      drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
 
       // eslint-disable-next-line
       new ImageComparison({
@@ -232,22 +209,33 @@ export default {
           },
         ],
       });
-      updateSize();
+      this.updateSize();
     };
     img.src = this.imgUrl;
-    window.addEventListener('resize', e => updateSize());
+    window.addEventListener('resize', this.updateSize);
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.updateSize);
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
-canvas {
+<style scoped>
+.with-mask {
   width: 100%;
   height: 100%;
 }
 
-@import 'ImageComparison.css';
+#full {
+  display: none;
+}
+.report-details {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+@import '~image-comparison/src/ImageComparison.css';
 
 /* Some modification: opacity of slide bar when not focused */
 .comparison-separator, .comparison-control {
