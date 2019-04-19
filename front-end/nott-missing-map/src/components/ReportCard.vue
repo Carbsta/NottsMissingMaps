@@ -75,7 +75,8 @@ export default {
     },
 
     getConfidence(x, y) {
-      return this.resultArr[x + y * this.slice.x];
+      console.log(this.resultArr[x + y * this.slice.x]);
+      return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
@@ -132,9 +133,8 @@ export default {
 
       console.log(this.img);
       const unique = [(this.img.result.map((classifier) => {
-        console.log(classifier);
         const tags = [].concat(classifier.classes
-          .filter(oneClass => oneClass.score > 0.5)
+          .filter(oneClass => oneClass.score > 0.8)
           .map(oneClass => `${oneClass.class}`));
         return tags;
       }))].flat().flat();
@@ -145,7 +145,6 @@ export default {
             || oneClass.class === 'Sparse Residential'
             || oneClass.class === 'Medium Residential',
         ).map(oneClass => `${oneClass.score}`));
-        console.log(score);
         return score;
       }))].flat().flat();
       const habScore = Math.max(...habScoreList);
@@ -154,7 +153,15 @@ export default {
 
     // The array of scores of every patch, used for calculate confidence
     resultArr() {
-      return this.img.result.map(patch => (patch.error ? 0 : patch.classes[0].score));
+      return [(this.img.result.map((classifier) => {
+        const score = [].concat(classifier.classes.filter(
+          oneClass => oneClass.class === 'Buildings'
+            || oneClass.class === 'Dense Residential'
+            || oneClass.class === 'Sparse Residential'
+            || oneClass.class === 'Medium Residential',
+        ).map(oneClass => `${oneClass.score}`));
+        return score;
+      }))].flat();
     },
   },
 

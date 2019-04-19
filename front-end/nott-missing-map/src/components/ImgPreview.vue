@@ -20,7 +20,8 @@ export default {
   },
   methods: {
     getConfidence(x, y) {
-      return this.resultArr[x + y * (this.slice.x)];
+      console.log(this.resultArr[x + y * this.slice.x]);
+      return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 
     updateSize() {
@@ -35,7 +36,15 @@ export default {
     },
 
     resultArr() {
-      return this.img.result.map(pitch => pitch.classes[0].score);
+      return [(this.img.result.map((classifier) => {
+        const score = [].concat(classifier.classes.filter(
+          oneClass => oneClass.class === 'Buildings'
+            || oneClass.class === 'Dense Residential'
+            || oneClass.class === 'Sparse Residential'
+            || oneClass.class === 'Medium Residential',
+        ).map(oneClass => `${oneClass.score}`));
+        return score;
+      }))].flat();
     },
   },
 
