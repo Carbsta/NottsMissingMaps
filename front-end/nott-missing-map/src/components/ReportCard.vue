@@ -56,9 +56,10 @@
         </v-card-actions>
         <v-slide-y-transition>
           <v-card-text v-show = "show">
-            <p v-for="n in reportInfo.length" :key="n" class="report-details">
+            <p v-for="n in reportInfo.length-1" :key="n" class="report-details">
               <!-- Probably it is not elegant / secure to write as following -->
-              <span v-html="(n != 1 ? '&nbsp;&nbsp;&nbsp;' : '') + reportInfo[n-1]"></span>
+              <span v-html="(n % 11 != 1 ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+               : '') + reportInfo[n]"></span>
             </p>
           </v-card-text>
         </v-slide-y-transition>
@@ -152,8 +153,11 @@ export default {
           this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`),
         );
       }
-
-      console.log(this.img);
+      const resultArray = [(this.img.result.map((classifier, index) => {
+        const score = ['Segment: '.concat(index + 1)].concat(classifier.classes.map(oneClass => `${oneClass.class}: ${oneClass.score}`));
+        console.log(score);
+        return score;
+      }))].flat().flat();
       const habScoreList = [(this.img.result.map((classifier) => {
         const score = [].concat(classifier.classes.filter(
           oneClass => oneClass.class === 'Buildings'
@@ -164,7 +168,7 @@ export default {
         return score;
       }))].flat().flat();
       const habScore = Math.max(...habScoreList);
-      return [`Habitation Score: ${habScore}`].concat([habScore]);
+      return [`Habitation Score: ${habScore}`].concat(resultArray);
     },
 
     // The array of class names, used to display coloured tags on the cards
