@@ -15,7 +15,7 @@
             <div class="title mb-0" >{{img.file.name}}</div>
             <div class="text-truncate"> <!-- Some important info can be put here! -->
               {{this.img.result.some(r => r.error) ?
-                "Warning: Error(s) from backend!" : this.reportInfo[0]}}
+                "Warning: Error(s) from backend!" : this.overallScore}}
             </div>
           </div>
         </v-card-title>
@@ -45,13 +45,9 @@
           </v-btn>
         </v-card-actions>
         <v-slide-y-transition>
-          <v-card-text v-show = "show">
-            <p v-for="n in reportInfo.length-1" :key="n" class="report-details">
-              <!-- Probably it is not elegant / secure to write as following -->
-              <span v-html="(n % 13 != 1 ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-               : '') + reportInfo[n]"></span>
-            </p>
-          </v-card-text>
+          <v-layout row mx-4 v-show = "show" id="tree-view">
+            <v-treeview text-xs-left  :items="reportTree"></v-treeview>
+          </v-layout>
         </v-slide-y-transition>
       </v-card>
     </v-flex>
@@ -150,28 +146,15 @@ export default {
       return window.URL.createObjectURL(this.img.file);
     },
 
-    // The infomation shown when the card is expanded
-    reportInfo() {
-      // every line is an element in the returned list
-      if (this.img.result === undefined || this.img.result[0] === undefined) {
-        return [
-          'Here should be the report details. Some random stuff here now',
-          `Name: ${this.img.file.name}`,
-          `LastModifiedDate: ${this.img.file.lastModifiedDate}`,
-          `Type: ${this.img.file.type}\n`,
-        ];
-      }
+    // The overall score shown as  subtitle of the card
+    overallScore() {
       if (this.img.result.some(r => r.error)) {
-        return [
+        return ([
           'Some error happens in backend: ',
         ].concat(
           this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`),
-        );
+        ))[0];
       }
-      const resultArray = this.img.result.map((segment, index) => {
-        const score = ['Segment: '.concat(index + 1)].concat(segment.classes.map(oneClass => `${oneClass.class}: ${oneClass.score}`));
-        return score;
-      }).reduce((arr1, arr2) => arr1.concat(arr2));
 
       const habScoreList = this.img.result
         .map(segment => segment.classes)
@@ -180,7 +163,25 @@ export default {
         .map(oneClass => oneClass.score);
 
       const habScore = Math.max(...habScoreList);
-      return [`Habitation Score: ${habScore}`].concat(resultArray);
+      return `Habitation Score: ${habScore}`;
+    },
+
+    reportTree() {
+      return this.img.result
+        .map((segment, i) => {
+          // Only list classes with non-zero score
+          const validClasses = segment.classes;// .filter(oneClass => oneClass.score !== 0)
+          const x = i % this.slice.x;
+          const y = Math.floor(i % this.slice.x);
+          return {
+            name: `Segment ${i} (x: ${x} y: ${y})`,
+            children:
+              validClasses.length === 0
+                ? [{ name: 'No class recognized.' }]
+                : validClasses
+                  .map(oneClass => ({ name: `${oneClass.class}: ${oneClass.score}` })),
+          };
+        });
     },
 
     // The array of class names, used to display coloured tags on the cards
@@ -234,7 +235,6 @@ export default {
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
     const img = new Image();
-
     img.onload = () => {
       drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
 
