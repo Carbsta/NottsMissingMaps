@@ -3,7 +3,7 @@ The repository for UoN group 25, working on IBM's Missing Maps project.
 Our website can be used here: https://missingmaps.eu-gb.cf.appdomain.cloud/
 The development build of the website is deployed here: https://fortestbranchnott.eu-gb.mybluemix.net/ (Warning, build may be broken or contain bugs)
 
-The user manual can be found here:
+The user manual can be found here: https://github.com/Carbsta/NottsMissingMaps/wiki/User-Manual
 
 The documentation can be found here:
 
