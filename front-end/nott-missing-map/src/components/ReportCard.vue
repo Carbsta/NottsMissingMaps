@@ -21,17 +21,17 @@
         </v-card-title>
 
         <!-- The tags -->
-        <v-layout row wrap mx-3 class="tags-container">
-          <v-chip xs6
-          v-for="tag in tagArr"
-          :key="tag"
-          text-color="white"
-          :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length] +
-          ' darken-2'"
+        <v-layout row wrap mx-4>
+          <v-chip selected text-color="white"
+            v-for="tag in tagArr" :key="tag"
+            :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length]
+              +' darken-3'"
           >
-          {{tag}}
-        </v-chip>
+            {{tag}}
+          </v-chip>
         </v-layout>
+
+        <!-- The buttons -->
         <v-card-actions>
           <v-btn small flat color="primary" v-on:click="download()">
             Download
@@ -130,7 +130,7 @@ export default {
         .map(c => c.name);
     },
 
-    availableClass(){
+    availableClass() {
       return classifier.classes.map(c => c.name);
     },
 
@@ -271,13 +271,6 @@ export default {
 .report-details {
   margin-bottom: 10px;
   text-align: left;
-}
-
-.tags-container {
-}
-
-.v-chip {
-  align-items: flex-start;
 }
 
 
