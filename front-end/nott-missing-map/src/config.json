@@ -8,5 +8,19 @@
     "x": 4,
     "y": 4
   },
-  "maxOpacity": 0.5
+  "maxOpacity": 0.5,
+  "classifier": {
+    "classes": [
+      { "name": "Agriculture", "inhabitable": 0 },
+      { "name": "Beach", "inhabitable": 0 },
+      { "name": "Desert", "inhabitable": 0 },
+      { "name": "Forest", "inhabitable": 0 },
+      { "name": "Shrubland", "inhabitable": 0 },
+      { "name": "Water", "inhabitable": 0 },
+      { "name": "Buildings", "inhabitable": 1 },
+      { "name": "Dense Residential", "inhabitable": 1 },
+      { "name": "Medium Residential", "inhabitable": 1 },
+      { "name": "Sparse Residential", "inhabitable": 1 }
+    ]
+  }
 }

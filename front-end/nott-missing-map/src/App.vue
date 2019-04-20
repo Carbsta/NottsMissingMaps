@@ -10,7 +10,7 @@
               <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
-              <v-toolbar-title>Missing Map</v-toolbar-title>
+              <v-toolbar-title>Missing Maps</v-toolbar-title>
 
               <!-- Alert window -->
               <v-alert
@@ -34,7 +34,8 @@
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
-                <DragDropBox class="upload-box" v-if="!uploading" :files="imgs" :alert="raiseAlert"/>
+                <DragDropBox v-if="!uploading"
+                  :files="imgs" :alert="raiseAlert" class="upload-box" />
                 <v-progress-circular
                   v-else
                   :rotate="0"
@@ -120,11 +121,12 @@
                 <v-dialog v-model="previewImg.on" width="1000">
                   <v-card  v-if="previewImg.on">
                     <v-card-title class="title grey lighten-2 pa-3" >
-                      {{previewImg.img.file.name}} <!-- Take the file name as the title of popup -->
+                      <!-- Take the file name as the title of popup -->
+                      {{previewImg.reportCard.img.file.name}}
                     </v-card-title>
 
                     <v-card-text>
-                      <ImgPreview :img="previewImg.img" :slice="$options.sliceNum"/>
+                      <ImgPreview :reportCard="previewImg.reportCard" :slice="$options.sliceNum"/>
                     </v-card-text>
 
                     <v-divider></v-divider> <!-- align the close button right  -->
@@ -166,7 +168,7 @@ export default {
       alertMsg: '',
       uploading: false,
       zipping: false,
-      previewImg: { img: undefined, on: false },
+      previewImg: { reportCard: undefined, on: false },
       progress: { data: 0, max: 0 },
     };
   },
@@ -196,7 +198,6 @@ export default {
           });
         }).catch((err) => {
           this.raiseAlert(err.message);
-          console.log([err]);
         }).finally(() => {
           this.uploadingPage = false; // switch page
           this.uploading = false;
@@ -222,7 +223,7 @@ export default {
     // Top left home button handler
     goHome() {
       this.imgs = [];
-      this.previewImg.img = undefined;
+      this.previewImg.reportCard = undefined;
       this.previewImg.on = false;
       setTimeout(() => {
         this.uploadingPage = true;
