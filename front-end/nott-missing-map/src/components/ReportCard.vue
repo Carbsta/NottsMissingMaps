@@ -6,26 +6,39 @@
           <v-flex xs6>
             <div ref="container">
               <img :src="imgUrl" ref = "i" class="comparison-image">
-              <canvas ref = "c"></canvas>
+              <canvas ref = "c" class="with-mask"></canvas>
             </div>
-            <canvas ref = "full" style="display: none"></canvas>
+            <canvas ref = "full" id="full"></canvas>
           </v-flex>
           <v-spacer />
           <div>
             <div class="title mb-0" >{{img.file.name}}</div>
             <div class="text-truncate"> <!-- Some important info can be put here! -->
-              {{this.img.result.some(r => r.error) ? "Warning: Error(s) from backend!" : ""}}
+              {{this.img.result.some(r => r.error) ?
+                "Warning: Error(s) from backend!" : this.reportInfo[0]}}
             </div>
           </div>
         </v-card-title>
 
+        <!-- The tags -->
+        <v-layout row wrap mx-4>
+          <v-chip selected text-color="white"
+            v-for="tag in tagArr" :key="tag"
+            :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length]
+              +' darken-3'"
+          >
+            {{tag}}
+          </v-chip>
+        </v-layout>
+
+        <!-- The buttons -->
         <v-card-actions>
           <v-btn small flat color="primary" v-on:click="download()">
             Download
           </v-btn>
           <v-spacer />
           <v-btn small flat color="primary"
-            @click="previewImg.img = img; previewImg.on = true"
+            @click="onPreview();"
           > Preview </v-btn>
           <v-btn small flat color="primary" @click="show = !show">
             {{show ? "Collapse" : "Details"}}
@@ -33,11 +46,10 @@
         </v-card-actions>
         <v-slide-y-transition>
           <v-card-text v-show = "show">
-            <p v-for="n in reportInfo.length" :key="n"
-              style="margin-bottom: 10px; text-align: left;"
-            >
+            <p v-for="n in reportInfo.length-1" :key="n" class="report-details">
               <!-- Probably it is not elegant / secure to write as following -->
-              <span v-html="(n != 1 ? '&nbsp;&nbsp;&nbsp;' : '') + reportInfo[n-1]"></span>
+              <span v-html="(n % 11 != 1 ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+               : '') + reportInfo[n]"></span>
             </p>
           </v-card-text>
         </v-slide-y-transition>
@@ -49,13 +61,18 @@
 <script>
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
+import drawCanvas from '@src/functions/drawCanvas';
+import { classifier } from '@src/config';
+import colors from 'vuetify/es5/util/colors';
+import kebabCase from 'lodash/kebabCase';
+
 
 export default {
   name: 'ReportCard',
   props: {
     img: Object,
     imgs: Array,
-    slice: Array,
+    slice: Object,
     previewImg: Object,
   },
   data() {
@@ -76,34 +93,7 @@ export default {
     },
 
     getConfidence(x, y) {
-      return this.resultArr[x + y * this.slice[0]];
-    },
-
-    // Draw the given Image html element on canvas
-    //   canvas: the canvas element to draw on
-    //   img: the DOM Image object
-    //   resizeCanvas: resize the size of canvas according to size of img
-    draw(canvas, img, resizeCanvas) {
-      const c = canvas;
-
-      if (resizeCanvas) {
-        c.setAttribute('height', img.height);
-        c.setAttribute('width', img.width);
-      }
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-
-      const tileWidth = c.width / this.slice[0];
-      const tileHeight = c.height / this.slice[1];
-      for (let x = 0; x < this.slice[0]; x += 1) {
-        for (let y = 0; y < this.slice[1]; y += 1) {
-          const conf = this.getConfidence(x, y);
-          const xStart = tileWidth * x;
-          const yStart = tileHeight * y;
-          ctx.fillStyle = `rgba(255, 0, 0, ${conf * 0.5})`; // red stands for non-habitable
-          ctx.fillRect(xStart, yStart, tileWidth, tileHeight);
-        }
-      }
+      return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
@@ -111,15 +101,45 @@ export default {
       const img = new Image();
 
       img.onload = () => {
-        this.draw(this.$refs.full, img, true);
+        this.$refs.full.setAttribute('height', img.height);
+        this.$refs.full.setAttribute('width', img.width);
+        drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
         this.downloadCanvas(this.$refs.full);
       };
 
       img.src = this.imgUrl;
     },
+
+    updateSize() {
+      const cont = this.$refs.container;
+      const { i } = this.$refs;
+      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
+      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
+      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
+    },
+
+    onPreview() {
+      this.previewImg.reportCard = this;
+      this.previewImg.on = true;
+    },
   },
 
   computed: {
+    palettes() {
+      // last 2 are: gray / shades
+      return Object.keys(colors).map(kebabCase).slice(0, -2);
+    },
+
+    inhabitableClasses() {
+      return classifier.classes
+        .filter(c => c.inhabitable)
+        .map(c => c.name);
+    },
+
+    availableClass() {
+      return classifier.classes.map(c => c.name);
+    },
+
     fileSize() {
       const kb = this.img.file.size / 1024;
       return kb < 100 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
@@ -148,19 +168,37 @@ export default {
           this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`),
         );
       }
+      const resultArray = this.img.result.map((segment, index) => {
+        const score = ['Segment: '.concat(index + 1)].concat(segment.classes.map(oneClass => `${oneClass.class}: ${oneClass.score}`));
+        return score;
+      }).reduce((arr1, arr2) => arr1.concat(arr2));
 
-      // normal case
-      const unique = [...new Set(['Tags: '].concat(this.img.result.map(
-        classifier => [].concat(classifier.classes.filter(oneClass => oneClass.score > 0.5).map(
-          oneClass => `${oneClass.class}`,
-        )),
-      )))];
-      return unique.reduce((acc, cur) => acc.concat(cur), []);
+      const habScoreList = this.img.result
+        .map(segment => segment.classes)
+        .reduce((arr1, arr2) => arr1.concat(arr2))
+        .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
+        .map(oneClass => oneClass.score);
+
+      const habScore = Math.max(...habScoreList);
+      return [`Habitation Score: ${habScore}`].concat(resultArray);
+    },
+
+    // The array of class names, used to display coloured tags on the cards
+    tagArr() {
+      const unique = this.img.result
+        .map(segment => segment.classes)
+        .reduce((arr1, arr2) => arr1.concat(arr2))
+        .filter(oneClass => oneClass.score > 0.75)
+        .map(oneClass => oneClass.class);
+      return [...new Set(unique)].sort();
     },
 
     // The array of scores of every patch, used for calculate confidence
     resultArr() {
-      return this.img.result.map(patch => (patch.error ? 0 : patch.classes[0].score));
+      return this.img.result
+        .map(segment => segment.classes
+          .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
+          .map(oneClass => oneClass.score));
     },
   },
 
@@ -170,7 +208,9 @@ export default {
       return new Promise((resolve, reject) => { // TODO: check if need extra bind
         const img = new Image();
         img.onload = (() => {
-          this.draw(this.$refs.full, img, true);
+          this.$refs.full.setAttribute('height', img.height);
+          this.$refs.full.setAttribute('width', img.width);
+          drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
 
           // determine file Name
           let fName = this.img.file.name;
@@ -194,15 +234,9 @@ export default {
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
     const img = new Image();
-    const updateSize = () => {
-      const cont = this.$refs.container;
-      const { i } = this.$refs;
-      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
-      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
-      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
-    };
+
     img.onload = () => {
-      this.draw(this.$refs.c, img, false);
+      drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
 
       // eslint-disable-next-line
       new ImageComparison({
@@ -219,22 +253,34 @@ export default {
           },
         ],
       });
-      updateSize();
+      this.updateSize();
     };
     img.src = this.imgUrl;
-    window.addEventListener('resize', e => updateSize());
+    window.addEventListener('resize', this.updateSize);
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.updateSize);
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
-canvas {
+<style scoped>
+.with-mask {
   width: 100%;
   height: 100%;
 }
 
-@import 'ImageComparison.css';
+#full {
+  display: none;
+}
+.report-details {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+
+@import '~image-comparison/src/ImageComparison.css';
 
 /* Some modification: opacity of slide bar when not focused */
 .comparison-separator, .comparison-control {

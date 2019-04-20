@@ -6,11 +6,11 @@
 
           <!-- The top tool bar -->
           <v-card>
-            <v-toolbar fixed style="z-index: 999;">
-              <v-btn icon v-on:click="goHome()">
+            <v-toolbar app fixed style="z-index: 999;">
+              <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
-              <v-toolbar-title>Missing Map</v-toolbar-title>
+              <v-toolbar-title>Missing Maps</v-toolbar-title>
 
               <!-- Alert window -->
               <v-alert
@@ -31,18 +31,11 @@
           <!-- uploading page content -->
           <template v-if="uploadingPage">
 
-            <v-flex xs12>  <!-- take the space of the floatting toolbar -->
-              <div style="height: 70px"> </div>
-            </v-flex>
-
             <!-- drag drop box -->
             <v-flex xs6>
               <v-flex>
                 <DragDropBox v-if="!uploading"
-                  :files="imgs"
-                  :alert="raiseAlert"
-                  style="position:fixed; top:94px ;margin: 2%; width:45%"
-                />
+                  :files="imgs" :alert="raiseAlert" class="upload-box" />
                 <v-progress-circular
                   v-else
                   :rotate="0"
@@ -59,9 +52,9 @@
               <!-- Bottom submit button -->
               <v-flex>
                 <v-btn
-                  class="text-none"
+                  class="text-none submit-btn"
                   color="primary"
-                  fixed style="margin:2%; bottom:0px; left:0px"
+                  fixed
                   v-on:click="submitImg"
                   :loading="uploading"
                 >
@@ -85,11 +78,19 @@
           <!-- report page content -->
           <template v-else>
             <v-container fluid grid-list-xl>
-              <v-toolbar
-                floatting flat
-                style="position: fixed; z-index: 2; left: 30px;bottom: 30px; width: auto"
-                class="transparent"
-              >
+              <v-layout row wrap>
+                <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
+                  <ReportCard
+                    ref="report_card"
+                    :img="img"
+                    :imgs="imgs"
+                    :slice="$options.sliceNum"
+                    :previewImg="previewImg"
+                  />
+                </v-flex>
+              </v-layout>
+
+              <v-toolbar floatting flat class="transparent bottom-toolbar">
                 <v-btn color="info" v-on:click="expand_all(true)">
                   <v-icon>unfold_more</v-icon>
                   Expand All
@@ -110,17 +111,6 @@
                   </template>
                 </v-btn>
               </v-toolbar>
-              <v-layout row wrap>
-                <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
-                  <ReportCard
-                    ref="report_card"
-                    :img="img"
-                    :imgs="imgs"
-                    :slice="slice"
-                    :previewImg="previewImg"
-                  />
-                </v-flex>
-              </v-layout>
               <br>
               <br>
               <br>
@@ -131,14 +121,15 @@
                 <v-dialog v-model="previewImg.on" width="1000">
                   <v-card  v-if="previewImg.on">
                     <v-card-title class="title grey lighten-2 pa-3" >
-                      {{previewImg.img.file.name}} <!-- Take the file name as the title of popup -->
+                      <!-- Take the file name as the title of popup -->
+                      {{previewImg.reportCard.img.file.name}}
                     </v-card-title>
 
-                    <v-card-text ref="imgPrev">
-                      <ImgPreview :img="previewImg.img" :slice="slice"/>
+                    <v-card-text>
+                      <ImgPreview :reportCard="previewImg.reportCard" :slice="$options.sliceNum"/>
                     </v-card-text>
 
-                    <v-divider></v-divider>
+                    <v-divider></v-divider> <!-- align the close button right  -->
 
                     <v-card-actions>
                       <v-spacer></v-spacer>
@@ -160,6 +151,7 @@
 <script>
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import { sliceNum } from '@src/config';
 import DragDropBox from './components/DragDropBox.vue';
 import PreviewCard from './components/PreviewCard.vue';
 import ReportCard from './components/ReportCard.vue';
@@ -175,12 +167,15 @@ export default {
       alert: false,
       alertMsg: '',
       uploading: false,
-      slice: [4, 4],
       zipping: false,
-      previewImg: { img: undefined, on: false },
+      previewImg: { reportCard: undefined, on: false },
       progress: { data: 0, max: 0 },
     };
   },
+
+  // See http://tinyurl.com/yxvd2kzt
+  // Can be accessed in template as $options.sliceNum
+  sliceNum,
 
   methods: {
     // Submit button handler
@@ -193,17 +188,16 @@ export default {
           // Init progress to 0
           data: 0,
           // 1 for image processing and 0.2 for querying API
-          max: 1.2 * this.imgs.length * this.slice[0] * this.slice[1],
+          max: 1.2 * this.imgs.length * sliceNum.x * sliceNum.y,
         };
         Promise.all(this.imgs.map(
-          img => upload(this.slice[0], this.slice[1], img.file, this.progress),
+          img => upload(sliceNum, img.file, this.progress),
         )).then((res) => {
           res.forEach((r, i) => {
             this.imgs[i].result = r;
           });
         }).catch((err) => {
           this.raiseAlert(err.message);
-          console.log([err]);
         }).finally(() => {
           this.uploadingPage = false; // switch page
           this.uploading = false;
@@ -228,8 +222,12 @@ export default {
 
     // Top left home button handler
     goHome() {
-      this.uploadingPage = true;
       this.imgs = [];
+      this.previewImg.reportCard = undefined;
+      this.previewImg.on = false;
+      setTimeout(() => {
+        this.uploadingPage = true;
+      }, 10);
     },
 
     // EXPAND ALL and COLLAPSE ALL button (expand=false for collapse)
@@ -279,7 +277,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 
 /* Avoid transition as we only have a flash to update the screen
@@ -293,6 +290,30 @@ export default {
 .non-transition-progress-circular *{
   transition: none !important;
   font-size: 34px; /* The font size of number at the centre of progress-circular */
+}
+
+/* The drag drop box on uploading page */
+.upload-box {
+  position: fixed;
+  top: 94px;
+  margin: 2%;
+  width: 45%
+}
+
+/* The submit button on uploading page */
+.submit-btn {
+  margin: 2%;
+  bottom: 0px;
+  left :0px;
+}
+
+/* The bottom toolbar on report page */
+.bottom-toolbar {
+  position: fixed;
+  z-index: 2;
+  left: 30px;
+  bottom: 30px;
+  width: auto;
 }
 
 </style>
