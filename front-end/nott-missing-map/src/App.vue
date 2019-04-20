@@ -79,7 +79,7 @@
           <template v-else>
             <v-container fluid grid-list-xl>
               <v-layout row wrap>
-                <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
+                <v-flex d-flex xs12 sm6 md4 v-for="img in imgs" :key="img.name">
                   <ReportCard
                     ref="report_card"
                     :img="img"

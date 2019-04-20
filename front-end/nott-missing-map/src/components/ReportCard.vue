@@ -3,25 +3,38 @@
     <v-flex>
       <v-card>
         <v-card-title primary-title>
-          <v-flex xs6>
-            <div ref="container">
+          <!-- Image -->
+          <v-flex xs6 sm12 lg6 justify-start pa-1>
+            <div ref="container" justify-start>
               <img :src="imgUrl" ref = "i" class="comparison-image">
               <canvas ref = "c" class="with-mask"></canvas>
             </div>
             <canvas ref = "full" id="full"></canvas>
           </v-flex>
+
           <v-spacer />
-          <div>
-            <div class="title mb-0" >{{img.file.name}}</div>
-            <div class="text-truncate"> <!-- Some important info can be put here! -->
-              {{this.img.result.some(r => r.error) ?
-                "Warning: Error(s) from backend!" : this.overallScore}}
-            </div>
-          </div>
+
+          <!-- Title and subtitle -->
+          <v-flex xs6 sm12 lg6 shrink pa-1 overflow-hidden class="text-xs-center ">
+            <!-- title -->
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div class="title pa-1 text-truncate" v-on="on">{{img.file.name}}</div>
+              </template>
+              <span>{{img.file.name}}</span>
+            </v-tooltip>
+            <!-- subtitle -->
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <div class="text-truncate" v-on="on">{{overallScore}}</div>
+              </template>
+              <span>{{overallScore}}</span>
+            </v-tooltip>
+          </v-flex>
         </v-card-title>
 
         <!-- The tags -->
-        <v-layout row wrap mx-4>
+        <v-layout row wrap mx-4 justify-space-between>
           <v-chip selected text-color="white"
             v-for="tag in tagArr" :key="tag"
             :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length]

@@ -3,10 +3,14 @@
    <v-flex>
      <v-card>
        <v-card-title primary-title>
+         <!-- Image -->
          <v-flex xs12 sm6 md12 lg6 justify-start pa-1>
            <v-img :src="imgUrl"></v-img>
          </v-flex>
+
          <v-spacer />
+
+         <!-- Title and subtitle -->
          <v-flex xs12 sm6 md12 lg6 shrink pa-1 overflow-hidden class="text-xs-left ">
            <v-tooltip top>
              <template v-slot:activator="{ on }">
