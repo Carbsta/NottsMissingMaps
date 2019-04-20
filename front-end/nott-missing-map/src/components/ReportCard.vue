@@ -38,7 +38,7 @@
           </v-btn>
           <v-spacer />
           <v-btn small flat color="primary"
-            @click="previewImg.img = img; previewImg.on = true"
+            @click="onPreview();"
           > Preview </v-btn>
           <v-btn small flat color="primary" @click="show = !show">
             {{show ? "Collapse" : "Details"}}
@@ -109,6 +109,7 @@ export default {
 
       img.src = this.imgUrl;
     },
+
     updateSize() {
       const cont = this.$refs.container;
       const { i } = this.$refs;
@@ -116,6 +117,11 @@ export default {
       this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
       this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
     },
+
+    onPreview() {
+      this.previewImg.reportCard = this;
+      this.previewImg.on = true;
+    }
   },
 
   computed: {

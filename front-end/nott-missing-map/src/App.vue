@@ -121,11 +121,11 @@
                 <v-dialog v-model="previewImg.on" width="1000">
                   <v-card  v-if="previewImg.on">
                     <v-card-title class="title grey lighten-2 pa-3" >
-                      {{previewImg.img.file.name}} <!-- Take the file name as the title of popup -->
+                      {{previewImg.reportCard.img.file.name}} <!-- Take the file name as the title of popup -->
                     </v-card-title>
 
                     <v-card-text>
-                      <ImgPreview :img="previewImg.img" :slice="$options.sliceNum"/>
+                      <ImgPreview :reportCard="previewImg.reportCard" :slice="$options.sliceNum"/>
                     </v-card-text>
 
                     <v-divider></v-divider> <!-- align the close button right  -->
@@ -167,7 +167,7 @@ export default {
       alertMsg: '',
       uploading: false,
       zipping: false,
-      previewImg: { img: undefined, on: false },
+      previewImg: { reportCard: undefined, on: false },
       progress: { data: 0, max: 0 },
     };
   },
@@ -223,7 +223,7 @@ export default {
     // Top left home button handler
     goHome() {
       this.imgs = [];
-      this.previewImg.img = undefined;
+      this.previewImg.reportCard = undefined;
       this.previewImg.on = false;
       setTimeout(() => {
         this.uploadingPage = true;

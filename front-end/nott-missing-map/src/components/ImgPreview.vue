@@ -1,6 +1,6 @@
 <template>
   <div ref="container" >
-    <img :src="imgUrl" ref = "i" class="comparison-image">
+    <img :src="reportCard.imgUrl" ref = "i" class="comparison-image">
     <canvas ref = "c" class="with-mask"></canvas>
   </div>
 </template>
@@ -12,38 +12,16 @@ import drawCanvas from '@src/functions/drawCanvas';
 export default {
   name: 'ImgPreview',
   props: {
-    img: Object,
+    reportCard: Object,
     slice: Object,
   },
   data() {
     return {};
   },
   methods: {
-    getConfidence(x, y) {
-      return Math.max(...this.resultArr[x + y * this.slice.x]);
-    },
-
     updateSize() {
       this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
       this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
-    },
-  },
-
-  computed: {
-    imgUrl() {
-      return window.URL.createObjectURL(this.img.file);
-    },
-
-    resultArr() {
-      return this.img.result.map((classifier) => {
-        const score = [].concat(classifier.classes.filter(
-          oneClass => oneClass.class === 'Buildings'
-            || oneClass.class === 'Dense Residential'
-            || oneClass.class === 'Sparse Residential'
-            || oneClass.class === 'Medium Residential',
-        ).map(oneClass => `${oneClass.score}`));
-        return score;
-      });
     },
   },
 
@@ -60,7 +38,7 @@ export default {
 
       this.$refs.c.setAttribute('height', img.height);
       this.$refs.c.setAttribute('width', img.width);
-      drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
+      drawCanvas(this.$refs.c, img, this.slice, this.reportCard.getConfidence);
 
       // eslint-disable-next-line
       new ImageComparison({
@@ -79,7 +57,7 @@ export default {
       });
       this.updateSize();
     };
-    img.src = this.imgUrl;
+    img.src = this.reportCard.imgUrl;
     window.addEventListener('resize', this.updateSize);
   },
   destroyed() {
