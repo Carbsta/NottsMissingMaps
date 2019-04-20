@@ -8,7 +8,6 @@
 <script>
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
-import { inhabitableClasses } from '@src/config';
 
 export default {
   name: 'ImgPreview',

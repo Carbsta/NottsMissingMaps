@@ -14,11 +14,34 @@
           <div>
             <div class="title mb-0" >{{img.file.name}}</div>
             <div class="text-truncate"> <!-- Some important info can be put here! -->
-              {{this.img.result.some(r => r.error) ? "Warning: Error(s) from backend!" : this.reportInfo[0]}}
+              {{this.img.result.some(r => r.error) ?
+                "Warning: Error(s) from backend!" : this.reportInfo[0]}}
             </div>
           </div>
         </v-card-title>
-
+        <div v-for="n in reportInfo.length" :key="n" style="display:inline;">
+          <!-- Probably it is not elegant / secure to write as following -->
+          <v-chip v-if="reportInfo[n] == 'Agriculture'"
+          color="light-green darken-4" text-color="white">Agriculture</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Beach'"
+          color="amber darken-1" text-color="white">Beach</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Buildings'"
+          color="red accent-4" text-color="white">Buildings</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Dense Residential'"
+          color="red darken-3" text-color="white">Dense Residential</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Desert'"
+          color="deep-orange darken-3" text-color="white">Desert</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Forest'"
+          color="green darken-4" text-color="white">Forest</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Medium Residential'"
+          color="red" text-color="white">Medium Residential</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Shrubland'"
+          color="lime darken-4" text-color="white">Shrubland</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Sparse Residential'"
+          color="red darken-1" text-color="white">Sparse Residential</v-chip>
+          <v-chip v-if="reportInfo[n] == 'Water'"
+          color="teal darken-3" text-color="white">Water</v-chip>
+        </div>
         <v-card-actions>
           <v-btn small flat color="primary" v-on:click="download()">
             Download
@@ -136,7 +159,7 @@ export default {
           .filter(oneClass => oneClass.score > 0.8)
           .map(oneClass => `${oneClass.class}`));
         return tags;
-      }))].flat().flat();
+      }))].flat().flat().sort();
       const habScoreList = [(this.img.result.map((classifier) => {
         const score = [].concat(classifier.classes.filter(
           oneClass => oneClass.class === 'Buildings'
