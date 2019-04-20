@@ -19,27 +19,27 @@
             </div>
           </div>
         </v-card-title>
-        <div v-for="n in reportInfo.length" :key="n" style="display:inline;">
+        <div v-for="n in tagArr.length" :key="n" style="display:inline;">
           <!-- Probably it is not elegant / secure to write as following -->
-          <v-chip v-if="reportInfo[n] == 'Agriculture'"
+          <v-chip v-if="tagArr[n-1] == 'Agriculture'"
           color="light-green darken-4" text-color="white">Agriculture</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Beach'"
+          <v-chip v-if="tagArr[n-1] == 'Beach'"
           color="amber darken-1" text-color="white">Beach</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Buildings'"
+          <v-chip v-if="tagArr[n-1] == 'Buildings'"
           color="red accent-4" text-color="white">Buildings</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Dense Residential'"
+          <v-chip v-if="tagArr[n-1] == 'Dense Residential'"
           color="red darken-3" text-color="white">Dense Residential</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Desert'"
+          <v-chip v-if="tagArr[n-1] == 'Desert'"
           color="deep-orange darken-3" text-color="white">Desert</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Forest'"
+          <v-chip v-if="tagArr[n-1] == 'Forest'"
           color="green darken-4" text-color="white">Forest</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Medium Residential'"
+          <v-chip v-if="tagArr[n-1] == 'Medium Residential'"
           color="red" text-color="white">Medium Residential</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Shrubland'"
+          <v-chip v-if="tagArr[n-1] == 'Shrubland'"
           color="lime darken-4" text-color="white">Shrubland</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Sparse Residential'"
+          <v-chip v-if="tagArr[n-1] == 'Sparse Residential'"
           color="red darken-1" text-color="white">Sparse Residential</v-chip>
-          <v-chip v-if="reportInfo[n] == 'Water'"
+          <v-chip v-if="tagArr[n-1] == 'Water'"
           color="teal darken-3" text-color="white">Water</v-chip>
         </div>
         <v-card-actions>
@@ -154,12 +154,6 @@ export default {
       }
 
       console.log(this.img);
-      const unique = [(this.img.result.map((classifier) => {
-        const tags = [].concat(classifier.classes
-          .filter(oneClass => oneClass.score > 0.8)
-          .map(oneClass => `${oneClass.class}`));
-        return tags;
-      }))].flat().flat().sort();
       const habScoreList = [(this.img.result.map((classifier) => {
         const score = [].concat(classifier.classes.filter(
           oneClass => oneClass.class === 'Buildings'
@@ -170,7 +164,19 @@ export default {
         return score;
       }))].flat().flat();
       const habScore = Math.max(...habScoreList);
-      return [`Habitation Score: ${habScore}`, 'Tags: '].concat([...new Set(unique)]);
+      return [`Habitation Score: ${habScore}`].concat([habScore]);
+    },
+
+    // The array of class names, used to display coloured tags on the cards
+    tagArr() {
+      const unique = [(this.img.result.map((classifier) => {
+        const tags = [].concat(classifier.classes
+          .filter(oneClass => oneClass.score > 0.75)
+          .map(oneClass => `${oneClass.class}`));
+        return tags;
+      }))].flat().flat().sort();
+      console.log([...new Set(unique)]);
+      return [...new Set(unique)];
     },
 
     // The array of scores of every patch, used for calculate confidence
