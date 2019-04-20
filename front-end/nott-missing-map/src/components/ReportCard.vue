@@ -57,9 +57,37 @@
             {{show ? "Collapse" : "Details"}}
           </v-btn>
         </v-card-actions>
+
+        <!-- Report details -->
         <v-slide-y-transition>
-          <v-layout row mx-4 v-show = "show" id="tree-view">
-            <v-treeview text-xs-left  :items="reportTree"></v-treeview>
+          <v-layout row mx-3 justify-start v-show="show" id="tree-view">
+            <v-treeview class="text-xs-left" :items="reportTree" style="width: 100%">
+              <template v-slot:label="{ item }">
+                <span>
+                  {{item.name + (item.score != undefined ? `: ${item.score}` : '')}}
+                </span>
+              </template>
+
+
+              <template v-slot:append="{ item }">
+                <v-tooltip left v-if="item.children">
+                  <template v-slot:activator="{ on }">
+                    <span v-on="on">
+                      {{Math.max(...item.children
+                        .filter(c=>inhabitableClasses.includes(c.name))
+                        .map(c=>c.score)).toFixed(2)
+                      }}
+                    </span>
+                  </template>
+                  <span>
+                    {{`Overall inhabitable score of ${item.name}: ` + Math.max(...item.children
+                      .filter(c=>inhabitableClasses.includes(c.name))
+                      .map(c=>c.score)).toFixed(2)
+                    }}
+                  </span>
+                </v-tooltip>
+              </template>
+            </v-treeview>
           </v-layout>
         </v-slide-y-transition>
       </v-card>
@@ -183,16 +211,12 @@ export default {
       return this.img.result
         .map((segment, i) => {
           // Only list classes with non-zero score
-          const validClasses = segment.classes;// .filter(oneClass => oneClass.score !== 0)
           const x = i % this.slice.x;
-          const y = Math.floor(i % this.slice.x);
+          const y = Math.floor(i / this.slice.x);
           return {
             name: `Segment ${i} (x: ${x} y: ${y})`,
-            children:
-              validClasses.length === 0
-                ? [{ name: 'No class recognized.' }]
-                : validClasses
-                  .map(oneClass => ({ name: `${oneClass.class}: ${oneClass.score}` })),
+            children:segment.classes
+              .map(oneClass => ({ name: oneClass.class, score: oneClass.score })),
           };
         });
     },
@@ -247,6 +271,7 @@ export default {
 
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
+    console.log(this.reportTree);
     const img = new Image();
     img.onload = () => {
       drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
@@ -286,10 +311,6 @@ export default {
 
 #full {
   display: none;
-}
-.report-details {
-  margin-bottom: 10px;
-  text-align: left;
 }
 
 
