@@ -11,9 +11,11 @@
       />
       <label for="file" class="md-headline" style="display: inline">
         <strong>
-          Choose a file <i class="material-icons folder-icon">folder</i>
+          Choose a satellite image <i class="material-icons folder-icon">folder</i>
         </strong>
         <span class="box__dragndrop"> or drag it here</span>.
+        <br>
+        Click <strong> submit </strong> when ready.
       </label>
     </div>
   </form>
