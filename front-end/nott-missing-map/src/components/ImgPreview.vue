@@ -35,7 +35,7 @@ export default {
     },
 
     resultArr() {
-      return [(this.img.result.map((classifier) => {
+      return this.img.result.map((classifier) => {
         const score = [].concat(classifier.classes.filter(
           oneClass => oneClass.class === 'Buildings'
             || oneClass.class === 'Dense Residential'
@@ -43,7 +43,7 @@ export default {
             || oneClass.class === 'Medium Residential',
         ).map(oneClass => `${oneClass.score}`));
         return score;
-      }))].flat();
+      });
     },
   },
 

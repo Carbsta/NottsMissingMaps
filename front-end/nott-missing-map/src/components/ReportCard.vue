@@ -153,47 +153,37 @@ export default {
           this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`),
         );
       }
-      const resultArray = [(this.img.result.map((classifier, index) => {
-        const score = ['Segment: '.concat(index + 1)].concat(classifier.classes.map(oneClass => `${oneClass.class}: ${oneClass.score}`));
-        console.log(score);
+      const resultArray = this.img.result.map((segment, index) => {
+        const score = ['Segment: '.concat(index + 1)].concat(segment.classes.map(oneClass => `${oneClass.class}: ${oneClass.score}`));
         return score;
-      }))].flat().flat();
-      const habScoreList = [(this.img.result.map((classifier) => {
-        const score = [].concat(classifier.classes.filter(
-          oneClass => oneClass.class === 'Buildings'
-            || oneClass.class === 'Dense Residential'
-            || oneClass.class === 'Sparse Residential'
-            || oneClass.class === 'Medium Residential',
-        ).map(oneClass => `${oneClass.score}`));
-        return score;
-      }))].flat().flat();
+      }).reduce((arr1, arr2) => arr1.concat(arr2));
+
+      const habScoreList = this.img.result
+        .map(segment => segment.classes)
+        .reduce((arr1, arr2) => arr1.concat(arr2))
+        .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
+        .map(oneClass => oneClass.score);
+
       const habScore = Math.max(...habScoreList);
       return [`Habitation Score: ${habScore}`].concat(resultArray);
     },
 
     // The array of class names, used to display coloured tags on the cards
     tagArr() {
-      const unique = [(this.img.result.map((classifier) => {
-        const tags = [].concat(classifier.classes
-          .filter(oneClass => oneClass.score > 0.75)
-          .map(oneClass => `${oneClass.class}`));
-        return tags;
-      }))].flat().flat().sort();
-      console.log([...new Set(unique)]);
-      return [...new Set(unique)];
+      const unique = this.img.result
+        .map(segment => segment.classes)
+        .reduce((arr1, arr2) => arr1.concat(arr2))
+        .filter(oneClass => oneClass.score > 0.75)
+        .map(oneClass => oneClass.class);
+      return [...new Set(unique)].sort();
     },
 
     // The array of scores of every patch, used for calculate confidence
     resultArr() {
-      return [(this.img.result.map((classifier) => {
-        const score = [].concat(classifier.classes.filter(
-          oneClass => oneClass.class === 'Buildings'
-            || oneClass.class === 'Dense Residential'
-            || oneClass.class === 'Sparse Residential'
-            || oneClass.class === 'Medium Residential',
-        ).map(oneClass => `${oneClass.score}`));
-        return score;
-      }))].flat();
+      return this.img.result
+        .map(segment => segment.classes
+          .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
+          .map(oneClass => oneClass.score));
     },
   },
 
