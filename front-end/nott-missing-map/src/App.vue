@@ -67,7 +67,7 @@
             <v-flex xs6>
               <v-container fluid grid-list-xl>
                 <v-layout row wrap>
-                  <v-flex d-flex xs6 v-for="file in imgs" :key="file.name">
+                  <v-flex d-flex xs12 md6 v-for="file in imgs" :key="file.name">
                     <PreviewCard upload :img="file" :imgs="imgs" :uploading="uploading" />
                   </v-flex>
                 </v-layout>
