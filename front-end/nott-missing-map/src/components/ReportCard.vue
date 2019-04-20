@@ -188,7 +188,7 @@ export default {
       const unique = this.img.result
         .map(segment => segment.classes)
         .reduce((arr1, arr2) => arr1.concat(arr2))
-        .filter(oneClass => oneClass.score > 0.75)
+        .filter(oneClass => oneClass.score > 0.8)
         .map(oneClass => oneClass.class);
       return [...new Set(unique)].sort();
     },
