@@ -62,28 +62,24 @@
         <v-slide-y-transition>
           <v-layout row mx-3 justify-start v-show="show" id="tree-view">
             <v-treeview class="text-xs-left" :items="reportTree" style="width: 100%">
+              <!-- Tree item -->
               <template v-slot:label="{ item }">
                 <span>
                   {{item.name + (item.score != undefined ? `: ${item.score}` : '')}}
                 </span>
               </template>
 
-
+              <!-- append: overallScore -->
               <template v-slot:append="{ item }">
                 <v-tooltip left v-if="item.children">
                   <template v-slot:activator="{ on }">
                     <span v-on="on">
-                      {{Math.max(...item.children
-                        .filter(c=>inhabitableClasses.includes(c.name))
-                        .map(c=>c.score)).toFixed(2)
-                      }}
+                      {{item.overallScore.toFixed(2)}}
                     </span>
                   </template>
                   <span>
-                    {{`Overall inhabitable score of ${item.name}: ` + Math.max(...item.children
-                      .filter(c=>inhabitableClasses.includes(c.name))
-                      .map(c=>c.score)).toFixed(2)
-                    }}
+                    {{`Overall inhabitable score of ${item.name}: `
+                      + item.overallScore.toFixed(2)}}
                   </span>
                 </v-tooltip>
               </template>
@@ -215,7 +211,10 @@ export default {
           const y = Math.floor(i / this.slice.x);
           return {
             name: `Segment ${i} (x: ${x} y: ${y})`,
-            children:segment.classes
+            overallScore: Math.max(...segment.classes
+              .filter(c => this.inhabitableClasses.includes(c.class))
+              .map(c => c.score)),
+            children: segment.classes
               .map(oneClass => ({ name: oneClass.class, score: oneClass.score })),
           };
         });
@@ -271,7 +270,6 @@ export default {
 
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
-    console.log(this.reportTree);
     const img = new Image();
     img.onload = () => {
       drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
