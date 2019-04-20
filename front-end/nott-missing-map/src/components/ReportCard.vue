@@ -48,7 +48,7 @@
           <v-card-text v-show = "show">
             <p v-for="n in reportInfo.length-1" :key="n" class="report-details">
               <!-- Probably it is not elegant / secure to write as following -->
-              <span v-html="(n % 11 != 1 ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+              <span v-html="(n % 13 != 1 ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                : '') + reportInfo[n]"></span>
             </p>
           </v-card-text>

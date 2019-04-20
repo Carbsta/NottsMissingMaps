@@ -18,8 +18,10 @@
       { "name": "Shrubland", "inhabitable": 0 },
       { "name": "Water", "inhabitable": 0 },
       { "name": "Buildings", "inhabitable": 1 },
+      { "name": "Car Park", "inhabitable": 1 },
       { "name": "Dense Residential", "inhabitable": 1 },
       { "name": "Medium Residential", "inhabitable": 1 },
+      { "name": "Roads", "inhabitable": 1 },
       { "name": "Sparse Residential", "inhabitable": 1 }
     ]
   }
