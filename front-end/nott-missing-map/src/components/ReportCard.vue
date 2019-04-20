@@ -121,7 +121,7 @@ export default {
     onPreview() {
       this.previewImg.reportCard = this;
       this.previewImg.on = true;
-    }
+    },
   },
 
   computed: {

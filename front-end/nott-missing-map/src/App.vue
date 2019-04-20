@@ -121,7 +121,8 @@
                 <v-dialog v-model="previewImg.on" width="1000">
                   <v-card  v-if="previewImg.on">
                     <v-card-title class="title grey lighten-2 pa-3" >
-                      {{previewImg.reportCard.img.file.name}} <!-- Take the file name as the title of popup -->
+                      <!-- Take the file name as the title of popup -->
+                      {{previewImg.reportCard.img.file.name}}
                     </v-card-title>
 
                     <v-card-text>
@@ -197,7 +198,6 @@ export default {
           });
         }).catch((err) => {
           this.raiseAlert(err.message);
-          console.log([err]);
         }).finally(() => {
           this.uploadingPage = false; // switch page
           this.uploading = false;
