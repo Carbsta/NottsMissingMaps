@@ -19,29 +19,19 @@
             </div>
           </div>
         </v-card-title>
-        <div v-for="n in tagArr.length" :key="n" style="display:inline;">
-          <!-- Probably it is not elegant / secure to write as following -->
-          <v-chip v-if="tagArr[n-1] == 'Agriculture'"
-          color="light-green darken-4" text-color="white">Agriculture</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Beach'"
-          color="amber darken-1" text-color="white">Beach</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Buildings'"
-          color="red accent-4" text-color="white">Buildings</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Dense Residential'"
-          color="red darken-3" text-color="white">Dense Residential</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Desert'"
-          color="deep-orange darken-3" text-color="white">Desert</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Forest'"
-          color="green darken-4" text-color="white">Forest</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Medium Residential'"
-          color="red" text-color="white">Medium Residential</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Shrubland'"
-          color="lime darken-4" text-color="white">Shrubland</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Sparse Residential'"
-          color="red darken-1" text-color="white">Sparse Residential</v-chip>
-          <v-chip v-if="tagArr[n-1] == 'Water'"
-          color="teal darken-3" text-color="white">Water</v-chip>
-        </div>
+
+        <!-- The tags -->
+        <v-layout row wrap mx-3 class="tags-container">
+          <v-chip xs6
+          v-for="tag in tagArr"
+          :key="tag"
+          text-color="white"
+          :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length] +
+          ' darken-2'"
+          >
+          {{tag}}
+        </v-chip>
+        </v-layout>
         <v-card-actions>
           <v-btn small flat color="primary" v-on:click="download()">
             Download
@@ -72,6 +62,10 @@
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
+import { classifier } from '@src/config';
+import colors from 'vuetify/es5/util/colors';
+import kebabCase from 'lodash/kebabCase';
+
 
 export default {
   name: 'ReportCard',
@@ -125,6 +119,21 @@ export default {
   },
 
   computed: {
+    palettes() {
+      // last 2 are: gray / shades
+      return Object.keys(colors).map(kebabCase).slice(0, -2);
+    },
+
+    inhabitableClasses() {
+      return classifier.classes
+        .filter(c => c.inhabitable)
+        .map(c => c.name);
+    },
+
+    availableClass(){
+      return classifier.classes.map(c => c.name);
+    },
+
     fileSize() {
       const kb = this.img.file.size / 1024;
       return kb < 100 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
@@ -263,6 +272,14 @@ export default {
   margin-bottom: 10px;
   text-align: left;
 }
+
+.tags-container {
+}
+
+.v-chip {
+  align-items: flex-start;
+}
+
 
 @import '~image-comparison/src/ImageComparison.css';
 
