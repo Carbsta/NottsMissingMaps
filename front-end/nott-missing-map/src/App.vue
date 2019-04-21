@@ -89,6 +89,8 @@
               <br>
               <br>
               <br>
+              <br class="hidden-sm-and-up">
+              <br class="hidden-sm-and-up">
             </v-container>
             <!-- popup in report page -->
             <template>
@@ -128,23 +130,30 @@
             <!-- 4 buttons on report page -->
             <template v-else>
               <v-flex pa-0 shrink text-xs-left>
-                <v-btn color="info" v-on:click="expand_all(true)">
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  v-on:click="expand_all(true)"
+                >
                   <v-icon class="hidden-sm-and-down">unfold_more</v-icon> Expand All
                 </v-btn>
 
-                <v-btn color="info" v-on:click="expand_all(false)">
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  v-on:click="expand_all(false)"
+                >
                   <v-icon class="hidden-sm-and-down">unfold_less</v-icon> Collapse All
                 </v-btn>
               </v-flex>
 
               <v-flex pa-0 shrink text-xs-left>
-                <v-btn color="info" @click="download_report">
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  @click="download_report"
+                >
                   <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
                   Download Report
                   <template v-slot:loader><span>Compressing...</span></template>
                 </v-btn>
 
-                <v-btn color="info" :loading="zipping" :disabled="zipping"
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  :loading="zipping" :disabled="zipping"
                   @click="download_all"
                 >
                   <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
@@ -391,6 +400,7 @@ export default {
    position: fixed;
    bottom: 0;
    left: 0;
+   z-index: 2;
 }
 
 </style>
