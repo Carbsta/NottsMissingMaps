@@ -307,6 +307,11 @@ export default {
       );
     },
   },
+
+  mounted() {
+    // Warning before refresh
+    window.onbeforeunload = () => "You will lose all of data and report.";
+  },
   components: {
     DragDropBox,
     PreviewCard,
