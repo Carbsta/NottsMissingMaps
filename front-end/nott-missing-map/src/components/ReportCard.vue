@@ -95,7 +95,7 @@
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
-import { classifier } from '@src/config';
+import { classifier, sliceNum } from '@src/config';
 import colors from 'vuetify/es5/util/colors';
 import kebabCase from 'lodash/kebabCase';
 
@@ -221,12 +221,22 @@ export default {
 
     // The array of class names, used to display coloured tags on the cards
     tagArr() {
-      const unique = this.img.result
+      const confidentClasses = this.img.result
         .map(segment => segment.classes)
         .reduce((arr1, arr2) => arr1.concat(arr2))
         .filter(oneClass => oneClass.score > 0.8)
         .map(oneClass => oneClass.class);
-      return [...new Set(unique)].sort();
+      const unique = [...new Set(confidentClasses)].sort();
+      return unique
+        .filter((tag) => {
+          if (tag === 'Beach') {
+            return confidentClasses
+              .filter(c => c === tag)
+              .length >= Math.floor((sliceNum.x + sliceNum.y) / 2);
+          }
+
+          return true;
+        });
     },
 
     // The array of scores of every patch, used for calculate confidence
