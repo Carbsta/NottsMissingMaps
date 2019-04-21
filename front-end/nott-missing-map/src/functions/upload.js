@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Jimp from 'jimp';
-import { VisualRecognition as vrCfg } from '@src/config';
+import { backEnd } from '@src/config';
 
 // The FileReader promise
 const pFileReader = file => new Promise((res, rej) => {
@@ -55,19 +55,22 @@ export default (slice, file, progress) => {
         return Promise.all(patchs);
       })
       // Then query the API
-      .then(patchs => Promise.all(patchs.map((buf, i) => {
-        const url = 'https://gateway.watsonplatform.net/visual-recognition/api/v3/classify';
+      .then(patchs => {
+        return axios.get(backEnd).then(res => ({ patchs, vrCfg: res.data }))
+      })
+      // Then access the classifier
+      .then(data => Promise.all(data.patchs.map((buf, i) => {
         const formData = new FormData();
         formData.set('images_file', new File([buf], `${filename}_${i}.${fileext}`, { type: file.type }));
-        formData.set('classifier_ids', vrCfg.modelID);
+        formData.set('classifier_ids', data.vrCfg.model_id);
         formData.set('threshold', 0);
 
-        return axios.post(url, formData, {
-          params: { version: vrCfg.version },
+        return axios.post(data.vrCfg.url, formData, {
+          params: { version: data.vrCfg.version },
           headers: { 'Accept-Language': 'en' },
           auth: {
             username: 'apikey',
-            password: vrCfg.APIkey,
+            password: data.vrCfg.api_key,
           },
           // timeout:60000, // add timeout limit if needed
         }).then((res) => {
