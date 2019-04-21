@@ -34,7 +34,7 @@
         </v-card-title>
 
         <!-- The tags -->
-        <v-layout row wrap mx-4 justify-space-between>
+        <v-layout row wrap mx-4 justify-start>
           <v-chip selected text-color="white"
             v-for="tag in tagArr" :key="tag"
             :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length]
