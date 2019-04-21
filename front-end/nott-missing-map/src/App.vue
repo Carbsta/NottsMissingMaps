@@ -211,7 +211,6 @@ export default {
           data: 0,
           max: this.imgs.length * sliceNum.x * sliceNum.y * weightSum,
         };
-        console.log(this.progress);
         Promise.all(this.imgs.map(
           img => upload(sliceNum, img.file, this.progress),
         )).then((res) => {

@@ -83,7 +83,6 @@ export default (slice, file, progress) => {
         const zips = imgZips(patchs, filename, fileext);
         // eslint-disable-next-line no-param-reassign
         progress.data += progressWeight.zipping * segmentsTotal;
-        console.log("!!!");
         return zips;
       })
       // Then query the API
