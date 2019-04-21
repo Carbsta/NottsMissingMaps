@@ -42,7 +42,7 @@
                   + ($vuetify.breakpoint.smAndDown ? ' pa-3': ' pa-4')"
               >
                 <div class="hidden-sm-and-up upload-box-xs-before"></div>
-                <DragDropBox :files="imgs" :alert="raiseAlert"class="elevation-3"/>
+                <DragDropBox :files="imgs" :alert="raiseAlert" class="elevation-3"/>
               </div>
               <v-progress-circular
                 v-else
@@ -310,7 +310,7 @@ export default {
 
   mounted() {
     // Warning before refresh
-    window.onbeforeunload = () => "You will lose all of data and report.";
+    window.onbeforeunload = () => 'You will lose all of data and report.';
   },
   components: {
     DragDropBox,
