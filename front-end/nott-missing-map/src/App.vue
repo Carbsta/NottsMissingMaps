@@ -233,19 +233,45 @@ export default {
     // EXPAND ALL and COLLAPSE ALL button (expand=false for collapse)
     expand_all(expand) {
       [...this.$refs.report_card].forEach((child) => {
-        // eslint-disable-next-line
-        child.show = expand;
+        child.show = expand; // eslint-disable-line no-param-reassign
       });
     },
 
     // DOWNLOAD ALL button handler
     download_all() {
+      // get text report blob
+      const report = [...this.$refs.report_card]
+        .map(rc => ({
+          file: rc.img.file.name,
+          report: {
+            overallScore: rc.overallScore,
+            overalTags: rc.tagArr,
+            segments: rc.reportTree.reduce((obj, seg) => {
+              obj[seg.name] = ({ // eslint-disable-line no-param-reassign
+                segmentOverallScore: seg.segOverallScore,
+                classes: seg.children.reduce((o, c) => {
+                  o[c.name] = c.score; // eslint-disable-line no-param-reassign
+                  return o;
+                }, {}),
+              });
+              return obj;
+            }, {}),
+          },
+        }));
+
+      const reportBlob = new Blob(
+        [JSON.stringify(report, null, 2)],
+        { type: 'text/plain' },
+      );
+
       this.zipping = true;
       const zip = new JSZip();
       const promiseBlob = [...this.$refs.report_card]
         .map(card => card.resultBlob);
       Promise.all(promiseBlob).then((blobs) => {
-        blobs.forEach(x => zip.file(x.name, x.blob));
+        blobs
+          .concat({ name: 'report.txt', blob: reportBlob })
+          .forEach(x => zip.file(x.name, x.blob));
 
         // Generate zip file
         zip.generateAsync({ type: 'blob' }).then((b) => {

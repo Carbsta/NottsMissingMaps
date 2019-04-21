@@ -26,9 +26,9 @@
             <!-- subtitle -->
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
-                <div class="text-truncate" v-on="on">{{overallScore}}</div>
+                <div class="text-truncate" v-on="on">{{`Habitation Score: ${overallScore}`}}</div>
               </template>
-              <span>{{overallScore}}</span>
+              <span>{{`Habitation Score: ${overallScore}`}}</span>
             </v-tooltip>
           </v-flex>
         </v-card-title>
@@ -69,17 +69,17 @@
                 </span>
               </template>
 
-              <!-- append: overallScore -->
+              <!-- append: segOverallScore -->
               <template v-slot:append="{ item }">
                 <v-tooltip left v-if="item.children">
                   <template v-slot:activator="{ on }">
                     <span v-on="on">
-                      {{item.overallScore.toFixed(2)}}
+                      {{item.segOverallScore.toFixed(2)}}
                     </span>
                   </template>
                   <span>
                     {{`Overall inhabitable score of ${item.name}: `
-                      + item.overallScore.toFixed(2)}}
+                      + item.segOverallScore.toFixed(2)}}
                   </span>
                 </v-tooltip>
               </template>
@@ -199,8 +199,7 @@ export default {
         .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
         .map(oneClass => oneClass.score);
 
-      const habScore = Math.max(...habScoreList);
-      return `Habitation Score: ${habScore}`;
+      return Math.max(...habScoreList);
     },
 
     reportTree() {
@@ -211,7 +210,7 @@ export default {
           const y = Math.floor(i / this.slice.x);
           return {
             name: `Segment ${i} (x: ${x} y: ${y})`,
-            overallScore: Math.max(...segment.classes
+            segOverallScore: Math.max(...segment.classes
               .filter(c => this.inhabitableClasses.includes(c.class))
               .map(c => c.score)),
             children: segment.classes
