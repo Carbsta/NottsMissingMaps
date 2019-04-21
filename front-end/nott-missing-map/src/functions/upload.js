@@ -92,7 +92,7 @@ export default (slice, file, progress) => {
       // Then access the classifier
       .then(data => Promise.all(data.patchs.map((buf, i) => {
         const formData = new FormData();
-        const imagesFile = new File([buf], `${filename}_chunk_${i}.${fileext}`, { type: 'application/zip' });
+        const imagesFile = new File([buf], `${filename}_chunk_${i}.zip`, { type: 'application/zip' });
         formData.set('images_file', imagesFile);
         formData.set('classifier_ids', data.vrCfg.model_id);
         formData.set('threshold', 0);
@@ -115,7 +115,12 @@ export default (slice, file, progress) => {
         });
       })))
       // Then filter the response data
-      .then(ress => ress.map(res => res.data.images)
+      .then(ress => ress.map(res => res.data.images
+        .sort((s1, s2) => {
+          const re = /(?<=_)(([1-9]?[0-9])(?!.*(_[1-9]?[0-9])))/;
+          const segmentNum = i => parseInt(re.exec(i.image), 10);
+          return segmentNum(s1) - segmentNum(s2);
+        }))
         .reduce((arr1, arr2) => arr1.concat(arr2))
         .map(img => img.classifiers[0]))
       .then((res) => { resolve(res); })
