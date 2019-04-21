@@ -1,6 +1,11 @@
 import axios from 'axios';
 import Jimp from 'jimp';
-import { backEnd } from '@src/config';
+import JSZip from 'jszip';
+import { backEnd, sliceNum } from '@src/config';
+
+// The greatest chunk size defined by IBM
+// See https://console.bluemix.net/apidocs/visual-recognition#classify-images
+const chunkSize = 20;
 
 // The FileReader promise
 const pFileReader = file => new Promise((res, rej) => {
@@ -20,6 +25,23 @@ function doubleRafPromise() {
   });
 }
 
+// Divide segments to chunks of 20 (IBM max size)
+// imgs: an array of images buffer (Int8Array)
+// return a list of zip File (Int8Array)
+function imgZips(imgs, filename, fileext) {
+  const zips = Array(Math.ceil(imgs.length / chunkSize))
+    .fill()
+    .map((_, index) => index * chunkSize)
+    .map(begin => imgs.slice(begin, begin + chunkSize))
+    .map((imgChunk, chunkNum) => {
+      const zip = new JSZip();
+      imgChunk.forEach((img, i) => {
+        zip.file(`${filename}_${chunkNum * chunkSize + i}.${fileext}`, img);
+      });
+      return zip.generateAsync({ type: 'uint8array' });
+    });
+  return Promise.all(zips);
+}
 
 // Return a promise, which will resolve the result of segment and classfying
 // Promises chaining is used, for reference: https://javascript.info/promise-chaining
@@ -54,14 +76,17 @@ export default (slice, file, progress) => {
         }
         return Promise.all(patchs);
       })
+      // Then zip to chunks
+      .then(patchs => imgZips(patchs, filename, fileext))
       // Then query the API
-      .then(patchs => {
-        return axios.get(backEnd).then(res => ({ patchs, vrCfg: res.data }))
-      })
+      .then(
+        patchs => axios.get(backEnd).then(res => ({ patchs, vrCfg: res.data })),
+      )
       // Then access the classifier
       .then(data => Promise.all(data.patchs.map((buf, i) => {
         const formData = new FormData();
-        formData.set('images_file', new File([buf], `${filename}_${i}.${fileext}`, { type: file.type }));
+        const imagesFile = new File([buf], `${filename}_chunk_${i}.${fileext}`, { type: 'application/zip' });
+        formData.set('images_file', imagesFile);
         formData.set('classifier_ids', data.vrCfg.model_id);
         formData.set('threshold', 0);
 
@@ -74,12 +99,17 @@ export default (slice, file, progress) => {
           },
           // timeout:60000, // add timeout limit if needed
         }).then((res) => {
-          progress.data += 0.2; // eslint-disable-line no-param-reassign
+          const segmentNum = (i === data.patchs.length - 1)
+            ? (sliceNum.x * sliceNum.y) % chunkSize
+            : chunkSize;
+          progress.data += 0.2 * segmentNum; // eslint-disable-line no-param-reassign
           return res;
         });
       })))
       // Then filter the response data
-      .then(ress => ress.map(res => res.data.images[0].classifiers[0]))
+      .then(ress => ress.map(res => res.data.images)
+        .reduce((arr1, arr2) => arr1.concat(arr2))
+        .map(img => img.classifiers[0]))
       .then((res) => { resolve(res); })
       .catch((err) => { reject(err); });
   });
