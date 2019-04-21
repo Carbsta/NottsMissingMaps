@@ -10,19 +10,23 @@
               <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
-              <v-toolbar-title>Missing Maps</v-toolbar-title>
+              <v-flex shrink>
+                <v-toolbar-title>Missing Maps</v-toolbar-title>
+              </v-flex>
 
               <!-- Alert window -->
-              <v-alert
-                dismissible
-                v-model="alert"
-                type="error"
-                icon="new_releases"
-                transition="scale-transition"
-                class="ml-5"
-              >
-                {{alertMsg}}
-              </v-alert>
+              <v-flex shrink class="overflow-hidden">
+                <v-alert
+                  dismissible
+                  v-model="alert"
+                  type="error"
+                  icon="new_releases"
+                  transition="scale-transition"
+                  class="ml-5"
+                >
+                  <span class="text-truncate">{{alertMsg}}</span>
+                </v-alert>
+              </v-flex>
               <v-spacer></v-spacer>
             </v-toolbar>
           </v-card>
@@ -31,43 +35,34 @@
           <!-- uploading page content -->
           <template v-if="uploadingPage">
 
-            <!-- drag drop box -->
-            <v-flex xs6>
-              <v-flex>
-                <DragDropBox v-if="!uploading"
-                  :files="imgs" :alert="raiseAlert" class="upload-box" />
-                <v-progress-circular
-                  v-else
-                  :rotate="0"
-                  :size="200"
-                  :width="20"
-                  :value="percentage"
-                  color="primary"
-                  class="non-transition-progress-circular"
-                >
-                  {{percentage}}%
-                </v-progress-circular>
-              </v-flex>
-
-              <!-- Bottom submit button -->
-              <v-flex>
-                <v-btn
-                  class="text-none submit-btn"
-                  color="primary"
-                  fixed
-                  v-on:click="submitImg"
-                  :loading="uploading"
-                >
-                  Submit
-                </v-btn>
-              </v-flex>
+            <!-- drag drop box and its progress circular -->
+            <v-flex xs12 sm6>
+              <div v-if="!uploading"
+                :class="($vuetify.breakpoint.xsOnly ? 'upload-box-xs': 'upload-box')
+                  + ($vuetify.breakpoint.smAndDown ? ' pa-3': ' pa-4')"
+              >
+                <div class="hidden-sm-and-up upload-box-xs-before"></div>
+                <DragDropBox :files="imgs" :alert="raiseAlert" class="elevation-3"/>
+              </div>
+              <v-progress-circular
+                v-else
+                :rotate="0"
+                :size="$vuetify.breakpoint.xsOnly ? 150 : 200"
+                :width="$vuetify.breakpoint.xsOnly ? 15 : 20"
+                :value="percentage"
+                color="primary"
+                class="non-transition-progress-circular"
+              >
+                {{percentage}}%
+              </v-progress-circular>
             </v-flex>
 
-            <!-- Right part -->
-            <v-flex xs6>
+            <v-flex xs12 class="hidden-sm-and-up upload-box-xs-placeholder"></v-flex>
+            <!-- Preview Cards -->
+            <v-flex xs12 sm6>
               <v-container fluid grid-list-xl>
                 <v-layout row wrap>
-                  <v-flex d-flex xs6 v-for="file in imgs" :key="file.name">
+                  <v-flex d-flex xs12 md6 v-for="file in imgs" :key="file.name">
                     <PreviewCard upload :img="file" :imgs="imgs" :uploading="uploading" />
                   </v-flex>
                 </v-layout>
@@ -79,7 +74,7 @@
           <template v-else>
             <v-container fluid grid-list-xl>
               <v-layout row wrap>
-                <v-flex d-flex xs4 v-for="img in imgs" :key="img.name">
+                <v-flex d-flex xs12 sm6 md4 v-for="img in imgs" :key="img.name">
                   <ReportCard
                     ref="report_card"
                     :img="img"
@@ -90,30 +85,12 @@
                 </v-flex>
               </v-layout>
 
-              <v-toolbar floatting flat class="transparent bottom-toolbar">
-                <v-btn color="info" v-on:click="expand_all(true)">
-                  <v-icon>unfold_more</v-icon>
-                  Expand All
-                </v-btn>
-                <v-btn color="info" v-on:click="expand_all(false)">
-                  <v-icon>unfold_less</v-icon>
-                  Collapse All
-                </v-btn>
-                <v-btn color="info"
-                  :loading="zipping"
-                  :disabled="zipping"
-                  @click="download_all"
-                >
-                  <v-icon>arrow_downward</v-icon>
-                  Download All
-                  <template v-slot:loader>
-                    <span>Compressing...</span>
-                  </template>
-                </v-btn>
-              </v-toolbar>
+
               <br>
               <br>
               <br>
+              <br class="hidden-sm-and-up">
+              <br class="hidden-sm-and-up">
             </v-container>
             <!-- popup in report page -->
             <template>
@@ -142,6 +119,50 @@
               </div>
             </template>
           </template>
+
+          <!-- Bottom buttons -->
+          <v-layout row wrap class="fab-container" ma-3>
+            <!-- submit button on uploading page -->
+            <v-btn v-if="uploadingPage" color="info" v-on:click="submitImg" :loading="uploading">
+              Submit
+            </v-btn>
+
+            <!-- 4 buttons on report page -->
+            <template v-else>
+              <v-flex pa-0 shrink text-xs-left>
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  v-on:click="expand_all(true)"
+                >
+                  <v-icon class="hidden-sm-and-down">unfold_more</v-icon> Expand All
+                </v-btn>
+
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  v-on:click="expand_all(false)"
+                >
+                  <v-icon class="hidden-sm-and-down">unfold_less</v-icon> Collapse All
+                </v-btn>
+              </v-flex>
+
+              <v-flex pa-0 shrink text-xs-left>
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  @click="download_report"
+                >
+                  <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
+                  Download Report
+                  <template v-slot:loader><span>Compressing...</span></template>
+                </v-btn>
+
+                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
+                  :loading="zipping" :disabled="zipping"
+                  @click="download_all"
+                >
+                  <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
+                  Download All
+                  <template v-slot:loader><span>Compressing...</span></template>
+                </v-btn>
+              </v-flex>
+            </template>
+          </v-layout>
         </v-layout>
       </v-content>
     </v-app>
@@ -233,9 +254,13 @@ export default {
     // EXPAND ALL and COLLAPSE ALL button (expand=false for collapse)
     expand_all(expand) {
       [...this.$refs.report_card].forEach((child) => {
-        // eslint-disable-next-line
-        child.show = expand;
+        child.show = expand; // eslint-disable-line no-param-reassign
       });
+    },
+
+    // DOWNLOAD REPORT button handler
+    download_report() {
+      saveAs(this.reportBlob, 'report.txt');
     },
 
     // DOWNLOAD ALL button handler
@@ -245,7 +270,9 @@ export default {
       const promiseBlob = [...this.$refs.report_card]
         .map(card => card.resultBlob);
       Promise.all(promiseBlob).then((blobs) => {
-        blobs.forEach(x => zip.file(x.name, x.blob));
+        blobs
+          .concat({ name: 'report.txt', blob: this.reportBlob })
+          .forEach(x => zip.file(x.name, x.blob));
 
         // Generate zip file
         zip.generateAsync({ type: 'blob' }).then((b) => {
@@ -260,6 +287,39 @@ export default {
     percentage() {
       return Math.floor(this.progress.data / this.progress.max * 100);
     },
+
+    // get text report blob
+    reportBlob() {
+      if (!this.$refs.report_card) return undefined;
+      const report = [...this.$refs.report_card]
+        .map(rc => ({
+          file: rc.img.file.name,
+          report: {
+            overallScore: rc.overallScore,
+            overalTags: rc.tagArr,
+            segments: rc.reportTree.reduce((obj, seg) => {
+              obj[seg.name] = ({ // eslint-disable-line no-param-reassign
+                segmentOverallScore: seg.segOverallScore,
+                classes: seg.children.reduce((o, c) => {
+                  o[c.name] = c.score; // eslint-disable-line no-param-reassign
+                  return o;
+                }, {}),
+              });
+              return obj;
+            }, {}),
+          },
+        }));
+
+      return new Blob(
+        [JSON.stringify(report, null, 2)],
+        { type: 'text/plain' },
+      );
+    },
+  },
+
+  mounted() {
+    // Warning before refresh
+    window.onbeforeunload = () => 'You will lose all of data and report.';
   },
   components: {
     DragDropBox,
@@ -295,9 +355,29 @@ export default {
 /* The drag drop box on uploading page */
 .upload-box {
   position: fixed;
-  top: 94px;
-  margin: 2%;
-  width: 45%
+  z-index: 2;
+  width: 50%;
+}
+.upload-box-xs {
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  padding: 14px;
+  padding-top: 0;
+  width: 100%;
+}
+.upload-box-xs-before {
+  height: 74px;
+  background-color: #fafafa;
+}
+.upload-box-xs form {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+
+  height: 200px !important;
+}
+.upload-box-xs-placeholder {
+  height: 230px
 }
 
 /* The submit button on uploading page */
@@ -314,6 +394,13 @@ export default {
   left: 30px;
   bottom: 30px;
   width: auto;
+}
+
+.fab-container {
+   position: fixed;
+   bottom: 0;
+   left: 0;
+   z-index: 2;
 }
 
 </style>

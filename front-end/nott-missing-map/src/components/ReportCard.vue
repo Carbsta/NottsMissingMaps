@@ -3,25 +3,38 @@
     <v-flex>
       <v-card>
         <v-card-title primary-title>
-          <v-flex xs6>
-            <div ref="container">
+          <!-- Image -->
+          <v-flex xs6 sm12 lg6 justify-start pa-1>
+            <div ref="container" justify-start>
               <img :src="imgUrl" ref = "i" class="comparison-image">
               <canvas ref = "c" class="with-mask"></canvas>
             </div>
             <canvas ref = "full" id="full"></canvas>
           </v-flex>
+
           <v-spacer />
-          <div>
-            <div class="title mb-0" >{{img.file.name}}</div>
-            <div class="text-truncate"> <!-- Some important info can be put here! -->
-              {{this.img.result.some(r => r.error) ?
-                "Warning: Error(s) from backend!" : this.reportInfo[0]}}
-            </div>
-          </div>
+
+          <!-- Title and subtitle -->
+          <v-flex xs6 sm12 lg6 shrink pa-1 overflow-hidden class="text-xs-center ">
+            <!-- title -->
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div class="title pa-1 text-truncate" v-on="on">{{img.file.name}}</div>
+              </template>
+              <span>{{img.file.name}}</span>
+            </v-tooltip>
+            <!-- subtitle -->
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <div class="text-truncate" v-on="on">{{`Habitation Score: ${overallScore}`}}</div>
+              </template>
+              <span>{{`Habitation Score: ${overallScore}`}}</span>
+            </v-tooltip>
+          </v-flex>
         </v-card-title>
 
         <!-- The tags -->
-        <v-layout row wrap mx-4>
+        <v-layout row wrap mx-4 justify-start>
           <v-chip selected text-color="white"
             v-for="tag in tagArr" :key="tag"
             :color="palettes[availableClass.findIndex(x => x == tag) % palettes.length]
@@ -44,14 +57,34 @@
             {{show ? "Collapse" : "Details"}}
           </v-btn>
         </v-card-actions>
+
+        <!-- Report details -->
         <v-slide-y-transition>
-          <v-card-text v-show = "show">
-            <p v-for="n in reportInfo.length-1" :key="n" class="report-details">
-              <!-- Probably it is not elegant / secure to write as following -->
-              <span v-html="(n % 11 != 1 ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-               : '') + reportInfo[n]"></span>
-            </p>
-          </v-card-text>
+          <v-layout row mx-3 justify-start v-show="show" id="tree-view">
+            <v-treeview class="text-xs-left" :items="reportTree" style="width: 100%">
+              <!-- Tree item -->
+              <template v-slot:label="{ item }">
+                <span>
+                  {{item.name + (item.score != undefined ? `: ${item.score}` : '')}}
+                </span>
+              </template>
+
+              <!-- append: segOverallScore -->
+              <template v-slot:append="{ item }">
+                <v-tooltip left v-if="item.children">
+                  <template v-slot:activator="{ on }">
+                    <span v-on="on">
+                      {{item.segOverallScore.toFixed(2)}}
+                    </span>
+                  </template>
+                  <span>
+                    {{`Overall inhabitable score of ${item.name}: `
+                      + item.segOverallScore.toFixed(2)}}
+                  </span>
+                </v-tooltip>
+              </template>
+            </v-treeview>
+          </v-layout>
         </v-slide-y-transition>
       </v-card>
     </v-flex>
@@ -62,7 +95,7 @@
 import { saveAs } from 'file-saver';
 import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
-import { classifier } from '@src/config';
+import { classifier, sliceNum } from '@src/config';
 import colors from 'vuetify/es5/util/colors';
 import kebabCase from 'lodash/kebabCase';
 
@@ -150,28 +183,15 @@ export default {
       return window.URL.createObjectURL(this.img.file);
     },
 
-    // The infomation shown when the card is expanded
-    reportInfo() {
-      // every line is an element in the returned list
-      if (this.img.result === undefined || this.img.result[0] === undefined) {
-        return [
-          'Here should be the report details. Some random stuff here now',
-          `Name: ${this.img.file.name}`,
-          `LastModifiedDate: ${this.img.file.lastModifiedDate}`,
-          `Type: ${this.img.file.type}\n`,
-        ];
-      }
+    // The overall score shown as  subtitle of the card
+    overallScore() {
       if (this.img.result.some(r => r.error)) {
-        return [
+        return ([
           'Some error happens in backend: ',
         ].concat(
           this.img.result.filter(r => r.error).map((r, i) => `Patch ${i}: ${r.error.message}`),
-        );
+        ))[0];
       }
-      const resultArray = this.img.result.map((segment, index) => {
-        const score = ['Segment: '.concat(index + 1)].concat(segment.classes.map(oneClass => `${oneClass.class}: ${oneClass.score}`));
-        return score;
-      }).reduce((arr1, arr2) => arr1.concat(arr2));
 
       const habScoreList = this.img.result
         .map(segment => segment.classes)
@@ -179,18 +199,44 @@ export default {
         .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
         .map(oneClass => oneClass.score);
 
-      const habScore = Math.max(...habScoreList);
-      return [`Habitation Score: ${habScore}`].concat(resultArray);
+      return Math.max(...habScoreList);
+    },
+
+    reportTree() {
+      return this.img.result
+        .map((segment, i) => {
+          // Only list classes with non-zero score
+          const x = i % this.slice.x;
+          const y = Math.floor(i / this.slice.x);
+          return {
+            name: `Segment ${i} (x: ${x} y: ${y})`,
+            segOverallScore: Math.max(...segment.classes
+              .filter(c => this.inhabitableClasses.includes(c.class))
+              .map(c => c.score)),
+            children: segment.classes
+              .map(oneClass => ({ name: oneClass.class, score: oneClass.score })),
+          };
+        });
     },
 
     // The array of class names, used to display coloured tags on the cards
     tagArr() {
-      const unique = this.img.result
+      const confidentClasses = this.img.result
         .map(segment => segment.classes)
         .reduce((arr1, arr2) => arr1.concat(arr2))
-        .filter(oneClass => oneClass.score > 0.75)
+        .filter(oneClass => oneClass.score > 0.8)
         .map(oneClass => oneClass.class);
-      return [...new Set(unique)].sort();
+      const unique = [...new Set(confidentClasses)].sort();
+      return unique
+        .filter((tag) => {
+          if (tag === 'Beach') {
+            return confidentClasses
+              .filter(c => c === tag)
+              .length >= Math.floor((sliceNum.x + sliceNum.y) / 2);
+          }
+
+          return true;
+        });
     },
 
     // The array of scores of every patch, used for calculate confidence
@@ -234,7 +280,6 @@ export default {
   // Change size of elements; Add slide bar; Add listener for window resizing...
   mounted() {
     const img = new Image();
-
     img.onload = () => {
       drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
 
@@ -273,10 +318,6 @@ export default {
 
 #full {
   display: none;
-}
-.report-details {
-  margin-bottom: 10px;
-  text-align: left;
 }
 
 

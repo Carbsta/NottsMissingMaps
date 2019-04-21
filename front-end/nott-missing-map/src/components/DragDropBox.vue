@@ -1,5 +1,5 @@
 <template>
-  <form ref="fileform" class="box mt-auto align-center d-flex grey lighten-4 elevation-3">
+  <form ref="fileform" class="box mt-auto align-center d-flex grey lighten-4">
     <div class="box__input">
       <input
         class="box__file"
@@ -11,9 +11,11 @@
       />
       <label for="file" class="md-headline" style="display: inline">
         <strong>
-          Choose a file <i class="material-icons folder-icon">folder</i>
+          Choose a satellite image <i class="material-icons folder-icon">folder</i>
         </strong>
         <span class="box__dragndrop"> or drag it here</span>.
+        <br>
+        Click <strong> submit </strong> when ready.
       </label>
     </div>
   </form>

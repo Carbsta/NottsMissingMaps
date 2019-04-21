@@ -3,14 +3,23 @@
    <v-flex>
      <v-card>
        <v-card-title primary-title>
-         <v-flex xs6>
+         <!-- Image -->
+         <v-flex xs12 sm6 md12 lg6 justify-start pa-1>
            <v-img :src="imgUrl"></v-img>
          </v-flex>
+
          <v-spacer />
-         <div>
-           <h3 class="headline mb-0" >{{img.file.name}}</h3>
-           <div>{{this.fileSize}}</div>
-         </div>
+
+         <!-- Title and subtitle -->
+         <v-flex xs12 sm6 md12 lg6 shrink pa-1 overflow-hidden class="text-xs-left ">
+           <v-tooltip top>
+             <template v-slot:activator="{ on }">
+               <h3 class="headline mb-1 mt-3 text-truncate" v-on="on">{{img.file.name}}</h3>
+             </template>
+             <span>{{img.file.name}}</span>
+           </v-tooltip>
+           <div class="mb-0 text-truncate">{{this.fileSize}}</div>
+         </v-flex>
        </v-card-title>
 
 
