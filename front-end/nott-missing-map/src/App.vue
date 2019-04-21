@@ -35,40 +35,31 @@
           <!-- uploading page content -->
           <template v-if="uploadingPage">
 
-            <!-- drag drop box -->
-            <v-flex xs6>
-              <v-flex>
-                <DragDropBox v-if="!uploading"
-                  :files="imgs" :alert="raiseAlert" class="upload-box" />
-                <v-progress-circular
-                  v-else
-                  :rotate="0"
-                  :size="200"
-                  :width="20"
-                  :value="percentage"
-                  color="primary"
-                  class="non-transition-progress-circular"
-                >
-                  {{percentage}}%
-                </v-progress-circular>
-              </v-flex>
-
-              <!-- Bottom submit button -->
-              <v-flex>
-                <v-btn
-                  class="text-none submit-btn"
-                  color="primary"
-                  fixed
-                  v-on:click="submitImg"
-                  :loading="uploading"
-                >
-                  Submit
-                </v-btn>
-              </v-flex>
+            <!-- drag drop box and its progress circular -->
+            <v-flex xs12 sm6>
+              <div v-if="!uploading"
+                :class="($vuetify.breakpoint.xsOnly ? 'upload-box-xs': 'upload-box')
+                  + ($vuetify.breakpoint.smAndDown ? ' pa-3': ' pa-4')"
+              >
+                <div class="hidden-sm-and-up upload-box-xs-before"></div>
+                <DragDropBox :files="imgs" :alert="raiseAlert"class="elevation-3"/>
+              </div>
+              <v-progress-circular
+                v-else
+                :rotate="0"
+                :size="$vuetify.breakpoint.xsOnly ? 150 : 200"
+                :width="$vuetify.breakpoint.xsOnly ? 15 : 20"
+                :value="percentage"
+                color="primary"
+                class="non-transition-progress-circular"
+              >
+                {{percentage}}%
+              </v-progress-circular>
             </v-flex>
 
-            <!-- Right part -->
-            <v-flex xs6>
+            <v-flex xs12 class="hidden-sm-and-up upload-box-xs-placeholder"></v-flex>
+            <!-- Preview Cards -->
+            <v-flex xs12 sm6>
               <v-container fluid grid-list-xl>
                 <v-layout row wrap>
                   <v-flex d-flex xs12 md6 v-for="file in imgs" :key="file.name">
@@ -350,9 +341,29 @@ export default {
 /* The drag drop box on uploading page */
 .upload-box {
   position: fixed;
-  top: 94px;
-  margin: 2%;
-  width: 45%
+  z-index: 2;
+  width: 50%;
+}
+.upload-box-xs {
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  padding: 14px;
+  padding-top: 0;
+  width: 100%;
+}
+.upload-box-xs-before {
+  height: 74px;
+  background-color: #fafafa;
+}
+.upload-box-xs form {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+
+  height: 200px !important;
+}
+.upload-box-xs-placeholder {
+  height: 230px
 }
 
 /* The submit button on uploading page */

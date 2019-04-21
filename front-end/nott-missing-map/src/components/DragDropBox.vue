@@ -1,5 +1,5 @@
 <template>
-  <form ref="fileform" class="box mt-auto align-center d-flex grey lighten-4 elevation-3">
+  <form ref="fileform" class="box mt-auto align-center d-flex grey lighten-4">
     <div class="box__input">
       <input
         class="box__file"
