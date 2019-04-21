@@ -319,7 +319,9 @@ export default {
 
   mounted() {
     // Warning before refresh
-    window.onbeforeunload = () => 'You will lose all of data and report.';
+    window.onbeforeunload = () => (this.imgs.length
+      ? 'You will lose all of data and report.'
+      : undefined);
   },
   components: {
     DragDropBox,
