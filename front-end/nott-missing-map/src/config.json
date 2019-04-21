@@ -1,8 +1,8 @@
 {
   "backEnd": "https://missingmaps.eu-gb.cf.appdomain.cloud/api",
   "sliceNum": {
-    "x": 4,
-    "y": 4
+    "x": 10,
+    "y": 10
   },
   "maxOpacity": 0.5,
   "progressWeight": {
