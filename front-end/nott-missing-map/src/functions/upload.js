@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Jimp from 'jimp';
 import JSZip from 'jszip';
-import { backEnd, sliceNum } from '@src/config';
+import { backEnd, progressWeight } from '@src/config';
 
 // The greatest chunk size defined by IBM
 // See https://console.bluemix.net/apidocs/visual-recognition#classify-images
@@ -46,6 +46,7 @@ function imgZips(imgs, filename, fileext) {
 // Return a promise, which will resolve the result of segment and classfying
 // Promises chaining is used, for reference: https://javascript.info/promise-chaining
 export default (slice, file, progress) => {
+  const segmentsTotal = slice.x * slice.y;
   const mime = file.type;
   const filename = file.name.replace(/\.[^/.]+$/, '');
   const fileext = /(?:\.([^.]+))?$/.exec(file.name)[1];
@@ -64,7 +65,8 @@ export default (slice, file, progress) => {
 
         for (let y = 0; y < slice.y; y += 1) {
           for (let x = 0; x < slice.x; x += 1) {
-            progress.data += 1.0; // eslint-disable-line no-param-reassign
+            // eslint-disable-next-line no-param-reassign
+            progress.data += progressWeight.segment;
             await doubleRafPromise(); // eslint-disable-line no-await-in-loop
 
             patchs.push(im
@@ -77,7 +79,13 @@ export default (slice, file, progress) => {
         return Promise.all(patchs);
       })
       // Then zip to chunks
-      .then(patchs => imgZips(patchs, filename, fileext))
+      .then((patchs) => {
+        const zips = imgZips(patchs, filename, fileext);
+        // eslint-disable-next-line no-param-reassign
+        progress.data += progressWeight.zipping * segmentsTotal;
+        console.log("!!!");
+        return zips;
+      })
       // Then query the API
       .then(
         patchs => axios.get(backEnd).then(res => ({ patchs, vrCfg: res.data })),
@@ -100,9 +108,10 @@ export default (slice, file, progress) => {
           // timeout:60000, // add timeout limit if needed
         }).then((res) => {
           const segmentNum = (i === data.patchs.length - 1)
-            ? (sliceNum.x * sliceNum.y) % chunkSize
+            ? (segmentsTotal) % chunkSize
             : chunkSize;
-          progress.data += 0.2 * segmentNum; // eslint-disable-line no-param-reassign
+          // eslint-disable-next-line no-param-reassign
+          progress.data += progressWeight.uploading * segmentNum;
           return res;
         });
       })))

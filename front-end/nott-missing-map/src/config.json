@@ -5,6 +5,11 @@
     "y": 4
   },
   "maxOpacity": 0.5,
+  "progressWeight": {
+    "segment": 10,
+    "zipping": 2,
+    "uploading": 2
+  },
   "classifier": {
     "classes": [
       { "name": "Agriculture", "inhabitable": 0 },
