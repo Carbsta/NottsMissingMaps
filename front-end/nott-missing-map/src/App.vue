@@ -10,19 +10,23 @@
               <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
-              <v-toolbar-title>Missing Maps</v-toolbar-title>
+              <v-flex shrink>
+                <v-toolbar-title>Missing Maps</v-toolbar-title>
+              </v-flex>
 
               <!-- Alert window -->
-              <v-alert
-                dismissible
-                v-model="alert"
-                type="error"
-                icon="new_releases"
-                transition="scale-transition"
-                class="ml-5"
-              >
-                {{alertMsg}}
-              </v-alert>
+              <v-flex shrink class="overflow-hidden">
+                <v-alert
+                  dismissible
+                  v-model="alert"
+                  type="error"
+                  icon="new_releases"
+                  transition="scale-transition"
+                  class="ml-5"
+                >
+                  <span class="text-truncate">{{alertMsg}}</span>
+                </v-alert>
+              </v-flex>
               <v-spacer></v-spacer>
             </v-toolbar>
           </v-card>
@@ -90,27 +94,7 @@
                 </v-flex>
               </v-layout>
 
-              <v-toolbar floatting flat class="transparent bottom-toolbar">
-                <v-btn color="info" v-on:click="expand_all(true)">
-                  <v-icon>unfold_more</v-icon>
-                  Expand All
-                </v-btn>
-                <v-btn color="info" v-on:click="expand_all(false)">
-                  <v-icon>unfold_less</v-icon>
-                  Collapse All
-                </v-btn>
-                <v-btn color="info"
-                  :loading="zipping"
-                  :disabled="zipping"
-                  @click="download_all"
-                >
-                  <v-icon>arrow_downward</v-icon>
-                  Download All
-                  <template v-slot:loader>
-                    <span>Compressing...</span>
-                  </template>
-                </v-btn>
-              </v-toolbar>
+
               <br>
               <br>
               <br>
@@ -142,6 +126,43 @@
               </div>
             </template>
           </template>
+
+          <!-- Bottom buttons -->
+          <v-layout row wrap class="fab-container" ma-3>
+            <!-- submit button on uploading page -->
+            <v-btn v-if="uploadingPage" color="info" v-on:click="submitImg" :loading="uploading">
+              Submit
+            </v-btn>
+
+            <!-- 4 buttons on report page -->
+            <template v-else>
+              <v-flex pa-0 shrink text-xs-left>
+                <v-btn color="info" v-on:click="expand_all(true)">
+                  <v-icon class="hidden-sm-and-down">unfold_more</v-icon> Expand All
+                </v-btn>
+
+                <v-btn color="info" v-on:click="expand_all(false)">
+                  <v-icon class="hidden-sm-and-down">unfold_less</v-icon> Collapse All
+                </v-btn>
+              </v-flex>
+
+              <v-flex pa-0 shrink text-xs-left>
+                <v-btn color="info" @click="download_report">
+                  <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
+                  Download Report
+                  <template v-slot:loader><span>Compressing...</span></template>
+                </v-btn>
+
+                <v-btn color="info" :loading="zipping" :disabled="zipping"
+                  @click="download_all"
+                >
+                  <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
+                  Download All
+                  <template v-slot:loader><span>Compressing...</span></template>
+                </v-btn>
+              </v-flex>
+            </template>
+          </v-layout>
         </v-layout>
       </v-content>
     </v-app>
@@ -237,9 +258,39 @@ export default {
       });
     },
 
+    // DOWNLOAD REPORT button handler
+    download_report() {
+      saveAs(this.reportBlob, 'report.txt');
+    },
+
     // DOWNLOAD ALL button handler
     download_all() {
-      // get text report blob
+      this.zipping = true;
+      const zip = new JSZip();
+      const promiseBlob = [...this.$refs.report_card]
+        .map(card => card.resultBlob);
+      Promise.all(promiseBlob).then((blobs) => {
+        blobs
+          .concat({ name: 'report.txt', blob: this.reportBlob })
+          .forEach(x => zip.file(x.name, x.blob));
+
+        // Generate zip file
+        zip.generateAsync({ type: 'blob' }).then((b) => {
+          saveAs(b, 'result.zip');
+          this.zipping = false;
+        });
+      });
+    },
+  },
+  computed: {
+    // Get the percentage of progress
+    percentage() {
+      return Math.floor(this.progress.data / this.progress.max * 100);
+    },
+
+    // get text report blob
+    reportBlob() {
+      if (!this.$refs.report_card) return undefined;
       const report = [...this.$refs.report_card]
         .map(rc => ({
           file: rc.img.file.name,
@@ -259,32 +310,10 @@ export default {
           },
         }));
 
-      const reportBlob = new Blob(
+      return new Blob(
         [JSON.stringify(report, null, 2)],
         { type: 'text/plain' },
       );
-
-      this.zipping = true;
-      const zip = new JSZip();
-      const promiseBlob = [...this.$refs.report_card]
-        .map(card => card.resultBlob);
-      Promise.all(promiseBlob).then((blobs) => {
-        blobs
-          .concat({ name: 'report.txt', blob: reportBlob })
-          .forEach(x => zip.file(x.name, x.blob));
-
-        // Generate zip file
-        zip.generateAsync({ type: 'blob' }).then((b) => {
-          saveAs(b, 'result.zip');
-          this.zipping = false;
-        });
-      });
-    },
-  },
-  computed: {
-    // Get the percentage of progress
-    percentage() {
-      return Math.floor(this.progress.data / this.progress.max * 100);
     },
   },
   components: {
@@ -340,6 +369,12 @@ export default {
   left: 30px;
   bottom: 30px;
   width: auto;
+}
+
+.fab-container {
+   position: fixed;
+   bottom: 0;
+   left: 0;
 }
 
 </style>
