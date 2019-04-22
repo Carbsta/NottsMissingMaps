@@ -165,7 +165,6 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { sliceNum, progressWeight } from '@src/config';
-import { stringify as json2yml } from 'json2yaml';
 import DragDropBox from './components/DragDropBox.vue';
 import PreviewCard from './components/PreviewCard.vue';
 import ReportCard from './components/ReportCard.vue';
@@ -255,29 +254,17 @@ export default {
     download_all() {
       this.zipping = true;
       const zip = new JSZip();
-      const promiseBlob = [...this.$refs.report_card]
-        .map(card => card.maskedImgBlob);
-      Promise.all(promiseBlob).then((blobs) => {
-        blobs
-          .forEach((x, i) => {
-            zip.file(x.name, x.blob);
-            // Add the user-friendly yaml report (looks like normal text)
-            zip.file(
-              `${x.name}_report.txt`,
-              new Blob([json2yml(this.reportObjs[i])], { type: 'text/plain' }),
-            );
-            // Add the nerd-specific report.
-            zip.file(
-              `${x.name}_report.json`,
-              new Blob([JSON.stringify(this.reportObjs[i], null, 2)], { type: 'text/plain' }),
-            );
+      [...this.$refs.report_card].map(card => card.downloadableBlobs)
+        .forEach((blobs) => {
+          ['maskedImg', 'friendlyReport', 'nerdReport'].forEach((fileItem) => {
+            zip.file(blobs[fileItem].name, blobs[fileItem].blob);
           });
-
-        // Generate zip file
-        zip.generateAsync({ type: 'blob' }).then((b) => {
-          saveAs(b, 'result.zip');
-          this.zipping = false;
         });
+
+      // Generate zip file
+      zip.generateAsync({ type: 'blob' }).then((b) => {
+        saveAs(b, 'result.zip');
+        this.zipping = false;
       });
     },
   },

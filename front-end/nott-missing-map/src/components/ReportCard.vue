@@ -127,24 +127,17 @@ export default {
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
     download() {
       this.zipping = true;
-      const maskedImg = this.maskedImgBlob;
+      const blobs = this.downloadableBlobs;
       const zip = new JSZip();
 
-      // The masked image file
-      zip.file(maskedImg.name, maskedImg.blob);
-
-      // The user-friendly yaml report (looks like normal text)
-      const ymlReport = new Blob([json2yml(this.reportObj)], { type: 'text/plain' });
-      zip.file(`${maskedImg.nameNoExt}_report.txt`, ymlReport);
-
-      // The nerd-specific report
-      const jsonReport = new Blob([JSON.stringify(this.reportObj, null, 2)], { type: 'text/plain' });
-      zip.file(`${maskedImg.nameNoExt}_report.json`, jsonReport);
+      ['maskedImg', 'friendlyReport', 'nerdReport'].forEach((fileItem) => {
+        zip.file(blobs[fileItem].name, blobs[fileItem].blob);
+      });
 
       // Save the zip
       zip.generateAsync({ type: 'blob' }).then((b) => {
         this.zipping = false;
-        saveAs(b, `${maskedImg.nameNoExt}.zip`);
+        saveAs(b, `${blobs.nameNoExt}.zip`);
       });
     },
 
@@ -277,7 +270,7 @@ export default {
 
   asyncComputed: {
     // The blob data of masked image. Used for bulk downloading
-    maskedImgBlob() {
+    downloadableBlobs() {
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = (() => {
@@ -292,9 +285,25 @@ export default {
           // call resolve
           this.$refs.full.toBlob((blob) => {
             resolve({
-              blob,
               nameNoExt: fName,
-              name: `${fName}_masked.jpg`,
+              maskedImg: {
+                blob,
+                name: `${fName}_masked.jpg`,
+              },
+              friendlyReport: {
+                blob: new Blob([
+                  json2yml(this.reportObj)
+                    .split('\n')
+                    .slice(1) // remove the first line
+                    .map(l => l.slice(2)) // decrease indent
+                    .join('\n'),
+                ], { type: 'text/plain' }),
+                name: `${fName}_report.txt`,
+              },
+              nerdReport: {
+                blob: new Blob([JSON.stringify(this.reportObj, null, 2)], { type: 'text/plain' }),
+                name: `${fName}_report.json`,
+              },
             });
           }, 'image/jpg');
         });
