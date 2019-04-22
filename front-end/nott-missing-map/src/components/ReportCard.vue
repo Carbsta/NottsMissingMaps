@@ -229,7 +229,7 @@ export default {
       const unique = [...new Set(confidentClasses)].sort();
       return unique
         .filter((tag) => {
-          if (tag === 'Beach') {
+          if (tag === 'Beach' || tag === 'Water') {
             return confidentClasses
               .filter(c => c === tag)
               .length >= Math.floor((sliceNum.x + sliceNum.y) / 2);
