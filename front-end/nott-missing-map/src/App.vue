@@ -103,7 +103,7 @@
                     </v-card-title>
 
                     <v-card-text>
-                      <ImgPreview :reportCard="previewImg.reportCard" :slice="$options.sliceNum"/>
+                      <ImgPreview :reportCard="previewImg.reportCard"/>
                     </v-card-text>
 
                     <v-divider></v-divider> <!-- align the close button right  -->
