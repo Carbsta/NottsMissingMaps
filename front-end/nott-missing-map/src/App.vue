@@ -103,7 +103,7 @@
                     </v-card-title>
 
                     <v-card-text>
-                      <ImgPreview :reportCard="previewImg.reportCard" :slice="$options.sliceNum"/>
+                      <ImgPreview :reportCard="previewImg.reportCard"/>
                     </v-card-text>
 
                     <v-divider></v-divider> <!-- align the close button right  -->
@@ -172,7 +172,7 @@
 <script>
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { sliceNum } from '@src/config';
+import { sliceNum, progressWeight } from '@src/config';
 import DragDropBox from './components/DragDropBox.vue';
 import PreviewCard from './components/PreviewCard.vue';
 import ReportCard from './components/ReportCard.vue';
@@ -205,11 +205,11 @@ export default {
         this.uploading = true;
         this.alert = false;
         this.alertMsg = '';
+        const weightSum = Object.values(progressWeight).reduce((a, b) => a + b, 0);
         this.progress = {
           // Init progress to 0
           data: 0,
-          // 1 for image processing and 0.2 for querying API
-          max: 1.2 * this.imgs.length * sliceNum.x * sliceNum.y,
+          max: this.imgs.length * sliceNum.x * sliceNum.y * weightSum,
         };
         Promise.all(this.imgs.map(
           img => upload(sliceNum, img.file, this.progress),
@@ -319,7 +319,9 @@ export default {
 
   mounted() {
     // Warning before refresh
-    window.onbeforeunload = () => 'You will lose all of data and report.';
+    window.onbeforeunload = () => (this.imgs.length
+      ? 'You will lose all of data and report.'
+      : undefined);
   },
   components: {
     DragDropBox,

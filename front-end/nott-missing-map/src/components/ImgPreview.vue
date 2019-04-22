@@ -13,7 +13,6 @@ export default {
   name: 'ImgPreview',
   props: {
     reportCard: Object,
-    slice: Object,
   },
   data() {
     return {};
@@ -38,7 +37,12 @@ export default {
 
       this.$refs.c.setAttribute('height', img.height);
       this.$refs.c.setAttribute('width', img.width);
-      drawCanvas(this.$refs.c, img, this.slice, this.reportCard.getConfidence);
+      drawCanvas(
+        this.$refs.c,
+        img,
+        this.reportCard.slice,
+        this.reportCard.getConfidence,
+      );
 
       // eslint-disable-next-line
       new ImageComparison({
