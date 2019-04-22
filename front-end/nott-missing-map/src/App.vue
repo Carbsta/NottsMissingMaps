@@ -145,14 +145,6 @@
 
               <v-flex pa-0 shrink text-xs-left>
                 <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
-                  @click="download_report"
-                >
-                  <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
-                  Download Report
-                  <template v-slot:loader><span>Compressing...</span></template>
-                </v-btn>
-
-                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
                   :loading="zipping" :disabled="zipping"
                   @click="download_all"
                 >
@@ -256,11 +248,6 @@ export default {
       [...this.$refs.report_card].forEach((child) => {
         child.show = expand; // eslint-disable-line no-param-reassign
       });
-    },
-
-    // DOWNLOAD REPORT button handler
-    download_report() {
-      saveAs(this.reportBlob, 'report.txt');
     },
 
     // DOWNLOAD ALL button handler
