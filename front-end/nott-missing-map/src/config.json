@@ -12,12 +12,12 @@
   },
   "classifier": {
     "classes": [
-      { "name": "Agriculture", "inhabitable": 0 },
       { "name": "Beach", "inhabitable": 0 },
       { "name": "Desert", "inhabitable": 0 },
       { "name": "Forest", "inhabitable": 0 },
       { "name": "Shrubland", "inhabitable": 0 },
       { "name": "Water", "inhabitable": 0 },
+      { "name": "Agriculture", "inhabitable": 1 },
       { "name": "Buildings", "inhabitable": 1 },
       { "name": "Car Park", "inhabitable": 1 },
       { "name": "Dense Residential", "inhabitable": 1 },
