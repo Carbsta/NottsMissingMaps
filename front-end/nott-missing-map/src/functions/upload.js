@@ -56,7 +56,7 @@ export default (slice, file, progress) => {
       buffer => Jimp.read(buffer),
     ) // return the Jimp instance
 
-    // Then process the images
+      // Then process the images
       .then(async (im) => {
         const w = im.bitmap.width / slice.x; // the width of every patch
         const h = im.bitmap.height / slice.y; // the height of every patch
@@ -117,8 +117,10 @@ export default (slice, file, progress) => {
       // Then filter the response data
       .then(ress => ress.map(res => res.data.images
         .sort((s1, s2) => {
-          const re = /(?<=_)(([1-9]?[0-9])(?!.*(_[1-9]?[0-9])))/;
-          const segmentNum = i => parseInt(re.exec(i.image), 10);
+          const re = /(_[1-9]?[0-9]+)(?!.*[0-9])/;
+          // remember to slice out the first "_" character
+          const segmentNum = i => parseInt(re.exec(i.image)[0].slice(1), 10);
+          console.log(s1, segmentNum(s1));
           return segmentNum(s1) - segmentNum(s2);
         }))
         .reduce((arr1, arr2) => arr1.concat(arr2))
