@@ -121,7 +121,7 @@
           </template>
 
           <!-- Bottom buttons -->
-          <v-layout row wrap class="fab-container" ma-3>
+          <v-layout row class="fab-container" ma-3>
             <!-- submit button on uploading page -->
             <v-btn v-if="uploadingPage" color="info" v-on:click="submitImg" :loading="uploading">
               Submit
@@ -390,6 +390,7 @@ export default {
    bottom: 0;
    left: 0;
    z-index: 2;
+   flex-wrap: wrap-reverse;
 }
 
 </style>
