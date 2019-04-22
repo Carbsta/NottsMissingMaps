@@ -12,7 +12,7 @@
   },
   "classifier": {
     "classes": [
-      { "name": "Inhabited", "inhabitable": 1 },
+      { "name": "Inhabited", "inhabitable": 1 }
     ]
   }
 }
