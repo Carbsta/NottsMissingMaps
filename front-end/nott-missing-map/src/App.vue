@@ -165,6 +165,7 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { sliceNum, progressWeight } from '@src/config';
+import { stringify as json2yml } from 'json2yaml';
 import DragDropBox from './components/DragDropBox.vue';
 import PreviewCard from './components/PreviewCard.vue';
 import ReportCard from './components/ReportCard.vue';
@@ -255,11 +256,22 @@ export default {
       this.zipping = true;
       const zip = new JSZip();
       const promiseBlob = [...this.$refs.report_card]
-        .map(card => card.resultBlob);
+        .map(card => card.maskedImgBlob);
       Promise.all(promiseBlob).then((blobs) => {
         blobs
-          .concat({ name: 'report.txt', blob: this.reportBlob })
-          .forEach(x => zip.file(x.name, x.blob));
+          .forEach((x, i) => {
+            zip.file(x.name, x.blob);
+            // Add the user-friendly yaml report (looks like normal text)
+            zip.file(
+              `${x.name}_report.txt`,
+              new Blob([json2yml(this.reportObjs[i])], { type: 'text/plain' }),
+            );
+            // Add the nerd-specific report.
+            zip.file(
+              `${x.name}_report.json`,
+              new Blob([JSON.stringify(this.reportObjs[i], null, 2)], { type: 'text/plain' }),
+            );
+          });
 
         // Generate zip file
         zip.generateAsync({ type: 'blob' }).then((b) => {
@@ -275,32 +287,10 @@ export default {
       return Math.floor(this.progress.data / this.progress.max * 100);
     },
 
-    // get text report blob
-    reportBlob() {
+    // The downloadable report objects
+    reportObjs() {
       if (!this.$refs.report_card) return undefined;
-      const report = [...this.$refs.report_card]
-        .map(rc => ({
-          file: rc.img.file.name,
-          report: {
-            overallScore: rc.overallScore,
-            overalTags: rc.tagArr,
-            segments: rc.reportTree.reduce((obj, seg) => {
-              obj[seg.name] = ({ // eslint-disable-line no-param-reassign
-                segmentOverallScore: seg.segOverallScore,
-                classes: seg.children.reduce((o, c) => {
-                  o[c.name] = c.score; // eslint-disable-line no-param-reassign
-                  return o;
-                }, {}),
-              });
-              return obj;
-            }, {}),
-          },
-        }));
-
-      return new Blob(
-        [JSON.stringify(report, null, 2)],
-        { type: 'text/plain' },
-      );
+      return [...this.$refs.report_card].map(rc => rc.reportObj);
     },
   },
 

@@ -46,8 +46,11 @@
 
         <!-- The buttons -->
         <v-card-actions>
-          <v-btn small flat color="primary" v-on:click="download()">
+          <v-btn small flat color="primary" @click="download()"
+            :loading="zipping" :disabled="zipping"
+          >
             Download
+            <template v-slot:loader><span>Compressing</span></template>
           </v-btn>
           <v-spacer />
           <v-btn small flat color="primary"
@@ -98,6 +101,8 @@ import drawCanvas from '@src/functions/drawCanvas';
 import { classifier, sliceNum } from '@src/config';
 import colors from 'vuetify/es5/util/colors';
 import kebabCase from 'lodash/kebabCase';
+import { stringify as json2yml } from 'json2yaml';
+import JSZip from 'jszip';
 
 
 export default {
@@ -111,36 +116,36 @@ export default {
   data() {
     return {
       show: false,
+      zipping: false,
     };
   },
   methods: {
-    // A helper function: download the given canvas element as image file
-    downloadCanvas(canvas) {
-      let fName = this.img.file.name;
-      fName = fName.replace(/\.[^/.]+$/, '');
-      fName += '_masked.jpg';
-
-      canvas.toBlob((blob) => {
-        saveAs(blob, fName);
-      }, 'image/jpg');
-    },
-
     getConfidence(x, y) {
       return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
     download() {
-      const img = new Image();
+      this.zipping = true;
+      const maskedImg = this.maskedImgBlob;
+      const zip = new JSZip();
 
-      img.onload = () => {
-        this.$refs.full.setAttribute('height', img.height);
-        this.$refs.full.setAttribute('width', img.width);
-        drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
-        this.downloadCanvas(this.$refs.full);
-      };
+      // The masked image file
+      zip.file(maskedImg.name, maskedImg.blob);
 
-      img.src = this.imgUrl;
+      // The user-friendly yaml report (looks like normal text)
+      const ymlReport = new Blob([json2yml(this.reportObj)], { type: 'text/plain' });
+      zip.file(`${maskedImg.nameNoExt}_report.txt`, ymlReport);
+
+      // The nerd-specific report
+      const jsonReport = new Blob([JSON.stringify(this.reportObj, null, 2)], { type: 'text/plain' });
+      zip.file(`${maskedImg.nameNoExt}_report.json`, jsonReport);
+
+      // Save the zip
+      zip.generateAsync({ type: 'blob' }).then((b) => {
+        this.zipping = false;
+        saveAs(b, `${maskedImg.nameNoExt}.zip`);
+      });
     },
 
     updateSize() {
@@ -202,6 +207,7 @@ export default {
       return Math.max(...habScoreList);
     },
 
+    // The data used in v-treeview
     reportTree() {
       return this.img.result
         .map((segment, i) => {
@@ -246,12 +252,33 @@ export default {
           .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
           .map(oneClass => oneClass.score));
     },
+
+    // The downloadable report object
+    reportObj() {
+      return {
+        file: this.img.file.name,
+        report: {
+          overallScore: this.overallScore,
+          overalTags: this.tagArr,
+          segments: this.reportTree.reduce((obj, seg) => {
+            obj[seg.name] = ({ // eslint-disable-line no-param-reassign
+              segmentOverallScore: seg.segOverallScore,
+              classes: seg.children.reduce((o, c) => {
+                o[c.name] = c.score; // eslint-disable-line no-param-reassign
+                return o;
+              }, {}),
+            });
+            return obj;
+          }, {}),
+        },
+      };
+    },
   },
 
   asyncComputed: {
     // The blob data of masked image. Used for bulk downloading
-    resultBlob() {
-      return new Promise((resolve, reject) => { // TODO: check if need extra bind
+    maskedImgBlob() {
+      return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = (() => {
           this.$refs.full.setAttribute('height', img.height);
@@ -261,13 +288,13 @@ export default {
           // determine file Name
           let fName = this.img.file.name;
           fName = fName.replace(/\.[^/.]+$/, '');
-          fName += '_masked.jpg';
 
           // call resolve
           this.$refs.full.toBlob((blob) => {
             resolve({
               blob,
-              name: fName,
+              nameNoExt: fName,
+              name: `${fName}_masked.jpg`,
             });
           }, 'image/jpg');
         });
