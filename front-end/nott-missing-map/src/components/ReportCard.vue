@@ -3,11 +3,9 @@
     <v-flex>
       <v-card>
         <v-card-title primary-title>
-          <!-- Image -->
           <v-flex xs6 sm12 lg6 justify-start pa-1>
-            <div ref="container" justify-start>
-              <img :src="imgUrl" ref = "i" class="comparison-image">
-              <canvas ref = "c" class="with-mask"></canvas>
+            <ImgPreview :reportCard="ThisReportCard" :maxHeight="300" alwaysBottom/>
+            <div style="max-height:300px">
             </div>
             <canvas ref = "full" id="full"></canvas>
           </v-flex>
@@ -46,8 +44,11 @@
 
         <!-- The buttons -->
         <v-card-actions>
-          <v-btn small flat color="primary" v-on:click="download()">
+          <v-btn small flat color="primary" @click="download()"
+            :loading="zipping" :disabled="zipping"
+          >
             Download
+            <template v-slot:loader><span>Compressing</span></template>
           </v-btn>
           <v-spacer />
           <v-btn small flat color="primary"
@@ -93,12 +94,13 @@
 
 <script>
 import { saveAs } from 'file-saver';
-import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
 import { classifier, sliceNum } from '@src/config';
 import colors from 'vuetify/es5/util/colors';
 import kebabCase from 'lodash/kebabCase';
-
+import { stringify as json2yml } from 'json2yaml';
+import JSZip from 'jszip';
+import ImgPreview from './ImgPreview.vue';
 
 export default {
   name: 'ReportCard',
@@ -111,44 +113,35 @@ export default {
   data() {
     return {
       show: false,
+      zipping: false,
+      dynamicTooltip: {
+        x: -1,
+        y: -1,
+        show: false,
+        segment: { children: [] },
+      },
     };
   },
   methods: {
-    // A helper function: download the given canvas element as image file
-    downloadCanvas(canvas) {
-      let fName = this.img.file.name;
-      fName = fName.replace(/\.[^/.]+$/, '');
-      fName += '_masked.jpg';
-
-      canvas.toBlob((blob) => {
-        saveAs(blob, fName);
-      }, 'image/jpg');
-    },
-
     getConfidence(x, y) {
       return Math.max(...this.resultArr[x + y * this.slice.x]);
     },
 
     // Download the masked image of current ReportCard. (Full size rather than thumbnail.)
     download() {
-      const img = new Image();
+      this.zipping = true;
+      const blobs = this.downloadableBlobs;
+      const zip = new JSZip();
 
-      img.onload = () => {
-        this.$refs.full.setAttribute('height', img.height);
-        this.$refs.full.setAttribute('width', img.width);
-        drawCanvas(this.$refs.full, img, this.slice, this.getConfidence);
-        this.downloadCanvas(this.$refs.full);
-      };
+      ['maskedImg', 'friendlyReport', 'nerdReport'].forEach((fileItem) => {
+        zip.file(blobs[fileItem].name, blobs[fileItem].blob);
+      });
 
-      img.src = this.imgUrl;
-    },
-
-    updateSize() {
-      const cont = this.$refs.container;
-      const { i } = this.$refs;
-      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
-      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
-      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
+      // Save the zip
+      zip.generateAsync({ type: 'blob' }).then((b) => {
+        this.zipping = false;
+        saveAs(b, `${blobs.nameNoExt}.zip`);
+      });
     },
 
     onPreview() {
@@ -171,11 +164,6 @@ export default {
 
     availableClass() {
       return classifier.classes.map(c => c.name);
-    },
-
-    fileSize() {
-      const kb = this.img.file.size / 1024;
-      return kb < 100 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
     },
 
     // The local url of image of this ReportCard
@@ -202,6 +190,7 @@ export default {
       return Math.max(...habScoreList);
     },
 
+    // The data used in v-treeview
     reportTree() {
       return this.img.result
         .map((segment, i) => {
@@ -246,12 +235,35 @@ export default {
           .filter(oneClass => this.inhabitableClasses.includes(oneClass.class))
           .map(oneClass => oneClass.score));
     },
+
+    // The downloadable report object
+    reportObj() {
+      return {
+        file: this.img.file.name,
+        report: {
+          overallScore: this.overallScore,
+          overalTags: this.tagArr,
+          segments: this.reportTree.reduce((obj, seg) => {
+            obj[seg.name] = ({ // eslint-disable-line no-param-reassign
+              segmentOverallScore: seg.segOverallScore,
+              classes: seg.children.reduce((o, c) => {
+                o[c.name] = c.score; // eslint-disable-line no-param-reassign
+                return o;
+              }, {}),
+            });
+            return obj;
+          }, {}),
+        },
+      };
+    },
+
+    ThisReportCard() { return this; },
   },
 
   asyncComputed: {
     // The blob data of masked image. Used for bulk downloading
-    resultBlob() {
-      return new Promise((resolve, reject) => { // TODO: check if need extra bind
+    downloadableBlobs() {
+      return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = (() => {
           this.$refs.full.setAttribute('height', img.height);
@@ -261,13 +273,29 @@ export default {
           // determine file Name
           let fName = this.img.file.name;
           fName = fName.replace(/\.[^/.]+$/, '');
-          fName += '_masked.jpg';
 
           // call resolve
           this.$refs.full.toBlob((blob) => {
             resolve({
-              blob,
-              name: fName,
+              nameNoExt: fName,
+              maskedImg: {
+                blob,
+                name: `${fName}_masked.jpg`,
+              },
+              friendlyReport: {
+                blob: new Blob([
+                  json2yml(this.reportObj)
+                    .split('\n')
+                    .slice(1) // remove the first line
+                    .map(l => l.slice(2)) // decrease indent
+                    .join('\n'),
+                ], { type: 'text/plain' }),
+                name: `${fName}_report.txt`,
+              },
+              nerdReport: {
+                blob: new Blob([JSON.stringify(this.reportObj, null, 2)], { type: 'text/plain' }),
+                name: `${fName}_report.json`,
+              },
             });
           }, 'image/jpg');
         });
@@ -277,45 +305,14 @@ export default {
     },
   },
 
-  // Change size of elements; Add slide bar; Add listener for window resizing...
-  mounted() {
-    const img = new Image();
-    img.onload = () => {
-      drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
-
-      // eslint-disable-next-line
-      new ImageComparison({
-        container: this.$refs.container,
-        startPosition: 0,
-        data: [
-          {
-            image: this.$refs.i,
-            label: '',
-          },
-          {
-            image: this.$refs.c,
-            label: '',
-          },
-        ],
-      });
-      this.updateSize();
-    };
-    img.src = this.imgUrl;
-    window.addEventListener('resize', this.updateSize);
-  },
-  destroyed() {
-    window.removeEventListener('resize', this.updateSize);
+  components: {
+    ImgPreview,
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.with-mask {
-  width: 100%;
-  height: 100%;
-}
-
 #full {
   display: none;
 }

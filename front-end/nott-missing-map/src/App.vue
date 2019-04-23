@@ -7,7 +7,7 @@
           <!-- The top tool bar -->
           <v-card>
             <v-toolbar app fixed style="z-index: 999;">
-              <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
+              <v-btn icon @click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
               <v-flex shrink>
@@ -28,6 +28,105 @@
                 </v-alert>
               </v-flex>
               <v-spacer></v-spacer>
+
+              <!-- Help dialog -->
+              <v-dialog v-model="helpDialog" width="90%">
+                <template v-slot:activator="{ on }">
+                  <v-btn icon v-on="on">
+                    <v-icon>help</v-icon>
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-title class="grey lighten-2 py-2">
+                    <span class="headline">Instructions</span>
+                    <v-spacer />
+                    <v-btn flat color="info" class="px-0"
+                      href="http://tinyurl.com/yxzvkmd9" target="_blank"
+                    >user manual</v-btn>
+                    <v-btn flat color="info" class="px-0 hidden-sm-and-down"
+                      href="http://tinyurl.com/y6qjhse3" target="_blank"
+                    >Software documentation</v-btn>
+                    <v-btn flat color="info" class="mx-0 hidden-xs-only"
+                      href="https://github.com/Carbsta/NottsMissingMaps" target="_blank"
+                    >
+                      <img style="display: inline; width: 20px;" class="ma-1"
+                        src="https://github.githubassets.com/favicon.ico"/>
+                      <span style="text-transform: none; position: relative; top:2px">Star</span>
+                    </v-btn>
+
+                  </v-card-title>
+                  <v-card-text class="text-xs-left">
+                    <h1 class="title mb-1">Upload Images</h1>
+                    <h2 class="subheading">Upload</h2>
+                    <p class="body-2">
+                      You can drag satellite images into the box, or click on
+                      it to choose file(s) from your filesystem.Images that you
+                      choose appear on the right-hand side on report cards. The
+                      name and size are shown to the right of the images.
+                    </p>
+
+                    <h2 class="subheading">Dismiss</h2>
+                    <p class="body-2">
+                      You can scroll through these cards if you have uploaded
+                      many images, and clicking on the dismiss button will remove
+                      that image.
+                    </p>
+                    <h2 class="subheading">Format error</h2>
+                    <p class="body-2">
+                      If the format of the file is not image, you will get a
+                      warning.
+                    </p>
+                    <h2 class="subheading">Submit</h2>
+                    <p class="body-2">
+                      Click “Submit”, classify these images that you uploaded.
+                      Once the progress indicator reaches 100 percent, you will
+                      be taken to the results page automatically.
+                    </p>
+
+                    <h1 class="title mb-1">Final Result</h1>
+                    <p class="body-2">
+                      The results of the classification are displayed as report cards.
+                    </p>
+                    <p class="body-2">
+                      You can click on the images to move the heatmap with the little
+                      slider, or click on the "preview" button to view a larger version
+                      of the image.
+                    </p>
+                    <p class="body-2">
+                      You can see the overall habitation score underneath the name of the
+                      image, this score is the maximum habitation score from all of the segments.
+                      It is a scale from 0 to 1, representing the percentage of confidence.
+                      Also, the colour coded tags tell you which classes have a segment with a
+                      score over 0.8. To view information about each segment in detail,
+                      click on the "details" button of a card, or click on the "expand all"
+                      button to view all cards at once.
+                    </p>
+                    <p class="body-2">
+                      The segments are numbered in ascending order, with segment 1 being
+                      the top left segment, going left to right. Each score represents
+                      the confidence in the image belonging to each class, from 0 to 1.
+                      1 being 100 percent confidence. Click "collapse" or "collapse all"
+                      to hide these details again.
+                    </p>
+                    <p class="body-2">
+                      The download button downloads the masked version of the image,
+                      and the download all button downloads a zip archive containing
+                      all of these images.
+                    </p>
+                    <p class="body-2">
+                      Enjoy using the website!
+                    </p>
+
+                  </v-card-text>
+                  <v-divider></v-divider>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" flat @click="helpDialog = false">
+                      Close
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-toolbar>
           </v-card>
 
@@ -92,28 +191,34 @@
               <br class="hidden-sm-and-up">
               <br class="hidden-sm-and-up">
             </v-container>
-            <!-- popup in report page -->
+            <!-- popup in report page (image preview) -->
             <template>
               <div class="text-xs-center">
-                <v-dialog v-model="previewImg.on" width="1000">
-                  <v-card  v-if="previewImg.on">
-                    <v-card-title class="title grey lighten-2 pa-3" >
-                      <!-- Take the file name as the title of popup -->
-                      {{previewImg.reportCard.img.file.name}}
-                    </v-card-title>
+                <v-dialog v-model="previewImg.on" content-class="prevDialog" ref="prevDialog">
+                  <v-card  v-if="previewImg.on" height="100%">
+                    <v-layout class="ma-0 pa-0" column style="height: 100%">
+                      <v-flex d-flex shrink>
+                        <v-card-title class="title grey lighten-2 pa-3" >
+                          <!-- Take the file name as the title of popup -->
+                          {{previewImg.reportCard.img.file.name}}
+                        </v-card-title>
+                      </v-flex>
 
-                    <v-card-text>
-                      <ImgPreview :reportCard="previewImg.reportCard"/>
-                    </v-card-text>
+                      <v-flex d-flex grow>
+                        <v-card-text class="">
+                          <ImgPreview :reportCard="previewImg.reportCard"/>
+                        </v-card-text>
+                      </v-flex>
+                      <v-flex d-flex shrink>
+                        <v-card-actions>
+                          <v-spacer></v-spacer><!-- align the close button right  -->
+                          <v-btn small color="primary" flat @click="previewImg.on = false">
+                            Close
+                          </v-btn>
+                        </v-card-actions>
+                      </v-flex>
+                    </v-layout>
 
-                    <v-divider></v-divider> <!-- align the close button right  -->
-
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn small color="primary" flat @click="previewImg.on = false">
-                        Close
-                      </v-btn>
-                    </v-card-actions>
                   </v-card>
                 </v-dialog>
               </div>
@@ -121,9 +226,9 @@
           </template>
 
           <!-- Bottom buttons -->
-          <v-layout row wrap class="fab-container" ma-3>
+          <v-layout row class="fab-container" ma-3>
             <!-- submit button on uploading page -->
-            <v-btn v-if="uploadingPage" color="info" v-on:click="submitImg" :loading="uploading">
+            <v-btn v-if="uploadingPage" color="info" @click="submitImg" :loading="uploading">
               Submit
             </v-btn>
 
@@ -131,27 +236,19 @@
             <template v-else>
               <v-flex pa-0 shrink text-xs-left>
                 <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
-                  v-on:click="expand_all(true)"
+                  @click="expand_all(true)"
                 >
                   <v-icon class="hidden-sm-and-down">unfold_more</v-icon> Expand All
                 </v-btn>
 
                 <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
-                  v-on:click="expand_all(false)"
+                  @click="expand_all(false)"
                 >
                   <v-icon class="hidden-sm-and-down">unfold_less</v-icon> Collapse All
                 </v-btn>
               </v-flex>
 
               <v-flex pa-0 shrink text-xs-left>
-                <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
-                  @click="download_report"
-                >
-                  <v-icon class="hidden-sm-and-down">arrow_downward</v-icon>
-                  Download Report
-                  <template v-slot:loader><span>Compressing...</span></template>
-                </v-btn>
-
                 <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
                   :loading="zipping" :disabled="zipping"
                   @click="download_all"
@@ -191,6 +288,7 @@ export default {
       zipping: false,
       previewImg: { reportCard: undefined, on: false },
       progress: { data: 0, max: 0 },
+      helpDialog: false,
     };
   },
 
@@ -258,27 +356,21 @@ export default {
       });
     },
 
-    // DOWNLOAD REPORT button handler
-    download_report() {
-      saveAs(this.reportBlob, 'report.txt');
-    },
-
     // DOWNLOAD ALL button handler
     download_all() {
       this.zipping = true;
       const zip = new JSZip();
-      const promiseBlob = [...this.$refs.report_card]
-        .map(card => card.resultBlob);
-      Promise.all(promiseBlob).then((blobs) => {
-        blobs
-          .concat({ name: 'report.txt', blob: this.reportBlob })
-          .forEach(x => zip.file(x.name, x.blob));
-
-        // Generate zip file
-        zip.generateAsync({ type: 'blob' }).then((b) => {
-          saveAs(b, 'result.zip');
-          this.zipping = false;
+      [...this.$refs.report_card].map(card => card.downloadableBlobs)
+        .forEach((blobs) => {
+          ['maskedImg', 'friendlyReport', 'nerdReport'].forEach((fileItem) => {
+            zip.file(blobs[fileItem].name, blobs[fileItem].blob);
+          });
         });
+
+      // Generate zip file
+      zip.generateAsync({ type: 'blob' }).then((b) => {
+        saveAs(b, 'result.zip');
+        this.zipping = false;
       });
     },
   },
@@ -288,32 +380,10 @@ export default {
       return Math.floor(this.progress.data / this.progress.max * 100);
     },
 
-    // get text report blob
-    reportBlob() {
+    // The downloadable report objects
+    reportObjs() {
       if (!this.$refs.report_card) return undefined;
-      const report = [...this.$refs.report_card]
-        .map(rc => ({
-          file: rc.img.file.name,
-          report: {
-            overallScore: rc.overallScore,
-            overalTags: rc.tagArr,
-            segments: rc.reportTree.reduce((obj, seg) => {
-              obj[seg.name] = ({ // eslint-disable-line no-param-reassign
-                segmentOverallScore: seg.segOverallScore,
-                classes: seg.children.reduce((o, c) => {
-                  o[c.name] = c.score; // eslint-disable-line no-param-reassign
-                  return o;
-                }, {}),
-              });
-              return obj;
-            }, {}),
-          },
-        }));
-
-      return new Blob(
-        [JSON.stringify(report, null, 2)],
-        { type: 'text/plain' },
-      );
+      return [...this.$refs.report_card].map(rc => rc.reportObj);
     },
   },
 
@@ -403,6 +473,13 @@ export default {
    bottom: 0;
    left: 0;
    z-index: 2;
+   flex-wrap: wrap-reverse;
+}
+
+.prevDialog {
+  width: 90%;
+  overflow: hidden;
+  height: 80vh;
 }
 
 </style>

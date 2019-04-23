@@ -120,7 +120,6 @@ export default (slice, file, progress) => {
           const re = /(_[1-9]?[0-9]+)(?!.*[0-9])/;
           // remember to slice out the first "_" character
           const segmentNum = i => parseInt(re.exec(i.image)[0].slice(1), 10);
-          console.log(s1, segmentNum(s1));
           return segmentNum(s1) - segmentNum(s2);
         }))
         .reduce((arr1, arr2) => arr1.concat(arr2))
