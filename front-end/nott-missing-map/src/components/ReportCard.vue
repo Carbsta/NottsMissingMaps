@@ -3,38 +3,8 @@
     <v-flex>
       <v-card>
         <v-card-title primary-title>
-          <!-- The tooltip for Image -->
-          <v-tooltip bottom
-            :position-x="dynamicTooltip.x"
-            :position-y="dynamicTooltip.y"
-            v-model="dynamicTooltip.show"
-            content-class="segment-info-tooltip"
-          >
-            <template>
-              <v-layout @mousemove="onmousemove($event)">
-                <span>{{dynamicTooltip.segment.name}}: </span>
-              </v-layout>
-              <v-layout row justify-space-between
-                v-for="oneClass in dynamicTooltip.segment.children"
-                :key="oneClass.name"
-                @mousemove="onmousemove($event)"
-              >
-                <span class="mr-1 ml-2">{{oneClass.name}}:</span>
-                <span>{{oneClass.score.toFixed(2)}}</span>
-              </v-layout>
-            </template>
-          </v-tooltip>
-
-          <!-- Image -->
           <v-flex xs6 sm12 lg6 justify-start pa-1>
-            <div ref="container" justify-start
-              @mousemove="onmousemove($event); dynamicTooltip.show = true"
-              @mouseover="dynamicTooltip.show = true"
-              @mouseout="dynamicTooltip.show = false;"
-            >
-              <img :src="imgUrl" ref = "i" class="comparison-image">
-              <canvas ref = "c" class="with-mask"></canvas>
-            </div>
+            <ImgPreview :reportCard="ThisReportCard" alwaysBottom/>
             <canvas ref = "full" id="full"></canvas>
           </v-flex>
 
@@ -122,13 +92,13 @@
 
 <script>
 import { saveAs } from 'file-saver';
-import ImageComparison from 'image-comparison';
 import drawCanvas from '@src/functions/drawCanvas';
 import { classifier, sliceNum } from '@src/config';
 import colors from 'vuetify/es5/util/colors';
 import kebabCase from 'lodash/kebabCase';
 import { stringify as json2yml } from 'json2yaml';
 import JSZip from 'jszip';
+import ImgPreview from './ImgPreview.vue';
 
 export default {
   name: 'ReportCard',
@@ -172,39 +142,9 @@ export default {
       });
     },
 
-    updateSize() {
-      const cont = this.$refs.container;
-      const { i } = this.$refs;
-      cont.style.height = `${cont.clientWidth * i.naturalHeight / i.naturalWidth}px`;
-      this.$refs.i.style.width = `${this.$refs.c.scrollWidth}px`;
-      this.$refs.i.style.height = `${this.$refs.c.scrollHeight}px`;
-    },
-
     onPreview() {
       this.previewImg.reportCard = this;
       this.previewImg.on = true;
-    },
-    onmousemove(e) {
-      // set tooltip position
-      if (!this.dynamicTooltip.show) return;
-
-      const rect = this.$refs.container.getBoundingClientRect();
-      const x = e.clientX - rect.left; // x position within the element.
-      const y = e.clientY - rect.top; // y position within the element.
-
-      const segmentW = rect.width / this.slice.x;
-      const segmentH = rect.height / this.slice.y;
-
-      const segmentX = Math.floor(x / segmentW);
-      const segmentY = Math.floor(y / segmentH);
-
-      if (segmentX < 0 || segmentX >= this.slice.x
-        || segmentY < 0 || segmentY >= this.slice.y) return;
-
-      this.dynamicTooltip.segment = this
-        .reportTree[segmentX + segmentY * this.slice.x];
-      this.dynamicTooltip.x = rect.left + segmentW * (segmentX + 0.5);
-      this.dynamicTooltip.y = rect.top + segmentH * (segmentY + 1);
     },
   },
 
@@ -222,11 +162,6 @@ export default {
 
     availableClass() {
       return classifier.classes.map(c => c.name);
-    },
-
-    fileSize() {
-      const kb = this.img.file.size / 1024;
-      return kb < 100 ? `${kb.toFixed(2)} KB` : `${(kb / 1024).toFixed(2)} MB`;
     },
 
     // The local url of image of this ReportCard
@@ -319,8 +254,9 @@ export default {
         },
       };
     },
-  },
 
+    ThisReportCard() { return this; },
+  },
 
   asyncComputed: {
     // The blob data of masked image. Used for bulk downloading
@@ -367,49 +303,14 @@ export default {
     },
   },
 
-  // Change size of elements; Add slide bar; Add listener for window resizing...
-  mounted() {
-    const img = new Image();
-    img.onload = () => {
-      drawCanvas(this.$refs.c, img, this.slice, this.getConfidence);
-
-      // eslint-disable-next-line
-      new ImageComparison({
-        container: this.$refs.container,
-        startPosition: 0,
-        data: [
-          {
-            image: this.$refs.i,
-            label: '',
-          },
-          {
-            image: this.$refs.c,
-            label: '',
-          },
-        ],
-      });
-      this.updateSize();
-    };
-    img.src = this.imgUrl;
-    window.addEventListener('resize', this.updateSize);
-  },
-  destroyed() {
-    window.removeEventListener('resize', this.updateSize);
+  components: {
+    ImgPreview,
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.with-mask {
-  width: 100%;
-  height: 100%;
-}
-
-.segment-info-tooltip {
-  transition: top 0.2s, left 0.2s;
-}
-
 #full {
   display: none;
 }

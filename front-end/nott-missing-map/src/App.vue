@@ -191,28 +191,34 @@
               <br class="hidden-sm-and-up">
               <br class="hidden-sm-and-up">
             </v-container>
-            <!-- popup in report page -->
+            <!-- popup in report page (image preview) -->
             <template>
               <div class="text-xs-center">
-                <v-dialog v-model="previewImg.on" width="1000">
-                  <v-card  v-if="previewImg.on">
-                    <v-card-title class="title grey lighten-2 pa-3" >
-                      <!-- Take the file name as the title of popup -->
-                      {{previewImg.reportCard.img.file.name}}
-                    </v-card-title>
+                <v-dialog v-model="previewImg.on" content-class="prevDialog" ref="prevDialog">
+                  <v-card  v-if="previewImg.on" height="100%">
+                    <v-layout class="ma-0 pa-0" column style="height: 100%">
+                      <v-flex d-flex>
+                        <v-card-title class="title grey lighten-2 pa-3" >
+                          <!-- Take the file name as the title of popup -->
+                          {{previewImg.reportCard.img.file.name}}
+                        </v-card-title>
+                      </v-flex>
 
-                    <v-card-text>
-                      <ImgPreview :reportCard="previewImg.reportCard"/>
-                    </v-card-text>
+                      <v-flex d-flex fill-height>
+                        <v-card-text class="">
+                          <ImgPreview :reportCard="previewImg.reportCard"/>
+                        </v-card-text>
+                      </v-flex>
+                      <v-flex d-flex>
+                        <v-card-actions>
+                          <v-spacer></v-spacer><!-- align the close button right  -->
+                          <v-btn small color="primary" flat @click="previewImg.on = false">
+                            Close
+                          </v-btn>
+                        </v-card-actions>
+                      </v-flex>
+                    </v-layout>
 
-                    <v-divider></v-divider> <!-- align the close button right  -->
-
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn small color="primary" flat @click="previewImg.on = false">
-                        Close
-                      </v-btn>
-                    </v-card-actions>
                   </v-card>
                 </v-dialog>
               </div>
@@ -468,6 +474,11 @@ export default {
    left: 0;
    z-index: 2;
    flex-wrap: wrap-reverse;
+}
+
+.prevDialog {
+  width: 90%;
+  height: 80vh;
 }
 
 </style>
