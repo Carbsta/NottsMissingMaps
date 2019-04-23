@@ -46,6 +46,7 @@ export default {
   props: {
     reportCard: Object,
     alwaysBottom: Boolean,
+    maxHeight: { type: Number },
   },
   data() {
     return {
@@ -54,6 +55,7 @@ export default {
       show: false,
       segment: { children: [] },
       top: true,
+      maxHeightValue: undefined,
     };
   },
   methods: {
@@ -61,14 +63,15 @@ export default {
       const contW = this.$refs.containerWrapper;
       const cont = this.$refs.container;
       const { i, c } = this.$refs;
-      const ratio = contW.clientWidth / contW.clientHeight;
+      const contWHeight = Math.min(this.maxHeightValue, contW.clientHeight);
+      const ratio = contW.clientWidth / contWHeight;
       if (ratio > i.naturalWidth / i.naturalHeight) {
-        cont.style.width = `${contW.clientHeight * i.naturalWidth / i.naturalHeight}px`;
+        cont.style.width = `${contWHeight * i.naturalWidth / i.naturalHeight}px`;
       } else {
         cont.style.height = `${contW.clientWidth * i.naturalHeight / i.naturalWidth}px`;
       }
-      c.style.width = cont.style.width;
-      c.style.height = cont.style.height;
+      c.style.width = '100%';
+      c.style.height = '100%';
 
       i.style.width = `${this.$refs.c.scrollWidth}px`;
       i.style.height = `${this.$refs.c.scrollHeight}px`;
@@ -100,10 +103,12 @@ export default {
   },
 
   mounted() {
+    this.maxHeightValue = this.maxHeight;
+    if (!this.maxHeightValue) this.maxHeightValue = (window.innerHeight - 300);
     const img = new Image();
     img.onload = () => {
-      this.$refs.c.setAttribute('height', this.$refs.containerWrapper.clientHeight);
-      this.$refs.c.setAttribute('width', this.$refs.containerWrapper.clientWidth);
+      this.$refs.c.setAttribute('height', this.$refs.i.naturalHeight);
+      this.$refs.c.setAttribute('width', this.$refs.i.naturalWidth);
       drawCanvas(
         this.$refs.c,
         img,
@@ -126,6 +131,7 @@ export default {
           },
         ],
       });
+
       this.updateSize();
     };
     img.src = this.reportCard.imgUrl;

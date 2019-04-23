@@ -4,7 +4,9 @@
       <v-card>
         <v-card-title primary-title>
           <v-flex xs6 sm12 lg6 justify-start pa-1>
-            <ImgPreview :reportCard="ThisReportCard" alwaysBottom/>
+            <ImgPreview :reportCard="ThisReportCard" :maxHeight="300" alwaysBottom/>
+            <div style="max-height:300px">
+            </div>
             <canvas ref = "full" id="full"></canvas>
           </v-flex>
 

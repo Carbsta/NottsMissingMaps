@@ -197,19 +197,19 @@
                 <v-dialog v-model="previewImg.on" content-class="prevDialog" ref="prevDialog">
                   <v-card  v-if="previewImg.on" height="100%">
                     <v-layout class="ma-0 pa-0" column style="height: 100%">
-                      <v-flex d-flex>
+                      <v-flex d-flex shrink>
                         <v-card-title class="title grey lighten-2 pa-3" >
                           <!-- Take the file name as the title of popup -->
                           {{previewImg.reportCard.img.file.name}}
                         </v-card-title>
                       </v-flex>
 
-                      <v-flex d-flex fill-height>
+                      <v-flex d-flex grow>
                         <v-card-text class="">
                           <ImgPreview :reportCard="previewImg.reportCard"/>
                         </v-card-text>
                       </v-flex>
-                      <v-flex d-flex>
+                      <v-flex d-flex shrink>
                         <v-card-actions>
                           <v-spacer></v-spacer><!-- align the close button right  -->
                           <v-btn small color="primary" flat @click="previewImg.on = false">
@@ -478,6 +478,7 @@ export default {
 
 .prevDialog {
   width: 90%;
+  overflow: hidden;
   height: 80vh;
 }
 
