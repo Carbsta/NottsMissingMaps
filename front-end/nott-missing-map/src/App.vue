@@ -7,7 +7,7 @@
           <!-- The top tool bar -->
           <v-card>
             <v-toolbar app fixed style="z-index: 999;">
-              <v-btn icon v-on:click="goHome()" :disabled="uploading || zipping">
+              <v-btn icon @click="goHome()" :disabled="uploading || zipping">
                 <v-icon>home</v-icon>
               </v-btn>
               <v-flex shrink>
@@ -28,6 +28,105 @@
                 </v-alert>
               </v-flex>
               <v-spacer></v-spacer>
+
+              <!-- Help dialog -->
+              <v-dialog v-model="helpDialog" width="90%">
+                <template v-slot:activator="{ on }">
+                  <v-btn icon v-on="on">
+                    <v-icon>help</v-icon>
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-title class="grey lighten-2 py-2">
+                    <span class="headline">Instructions</span>
+                    <v-spacer />
+                    <v-btn flat color="info" class="px-0"
+                      href="http://tinyurl.com/yxzvkmd9" target="_blank"
+                    >user manual</v-btn>
+                    <v-btn flat color="info" class="px-0 hidden-sm-and-down"
+                      href="http://tinyurl.com/y6qjhse3" target="_blank"
+                    >Software documentation</v-btn>
+                    <v-btn flat color="info" class="mx-0 hidden-xs-only"
+                      href="https://github.com/Carbsta/NottsMissingMaps" target="_blank"
+                    >
+                      <img style="display: inline; width: 20px;" class="ma-1"
+                        src="https://github.githubassets.com/favicon.ico"/>
+                      <span style="text-transform: none; position: relative; top:2px">Star</span>
+                    </v-btn>
+
+                  </v-card-title>
+                  <v-card-text class="text-xs-left">
+                    <h1 class="title mb-1">Upload Images</h1>
+                    <h2 class="subheading">Upload</h2>
+                    <p class="body-2">
+                      You can drag satellite images into the box, or click on
+                      it to choose file(s) from your filesystem.Images that you
+                      choose appear on the right-hand side on report cards. The
+                      name and size are shown to the right of the images.
+                    </p>
+
+                    <h2 class="subheading">Dismiss</h2>
+                    <p class="body-2">
+                      You can scroll through these cards if you have uploaded
+                      many images, and clicking on the dismiss button will remove
+                      that image.
+                    </p>
+                    <h2 class="subheading">Format error</h2>
+                    <p class="body-2">
+                      If the format of the file is not image, you will get a
+                      warning.
+                    </p>
+                    <h2 class="subheading">Submit</h2>
+                    <p class="body-2">
+                      Click “Submit”, classify these images that you uploaded.
+                      Once the progress indicator reaches 100 percent, you will
+                      be taken to the results page automatically.
+                    </p>
+
+                    <h1 class="title mb-1">Final Result</h1>
+                    <p class="body-2">
+                      The results of the classification are displayed as report cards.
+                    </p>
+                    <p class="body-2">
+                      You can click on the images to move the heatmap with the little
+                      slider, or click on the "preview" button to view a larger version
+                      of the image.
+                    </p>
+                    <p class="body-2">
+                      You can see the overall habitation score underneath the name of the
+                      image, this score is the maximum habitation score from all of the segments.
+                      It is a scale from 0 to 1, representing the percentage of confidence.
+                      Also, the colour coded tags tell you which classes have a segment with a
+                      score over 0.8. To view information about each segment in detail,
+                      click on the "details" button of a card, or click on the "expand all"
+                      button to view all cards at once.
+                    </p>
+                    <p class="body-2">
+                      The segments are numbered in ascending order, with segment 1 being
+                      the top left segment, going left to right. Each score represents
+                      the confidence in the image belonging to each class, from 0 to 1.
+                      1 being 100 percent confidence. Click "collapse" or "collapse all"
+                      to hide these details again.
+                    </p>
+                    <p class="body-2">
+                      The download button downloads the masked version of the image,
+                      and the download all button downloads a zip archive containing
+                      all of these images.
+                    </p>
+                    <p class="body-2">
+                      Enjoy using the website!
+                    </p>
+
+                  </v-card-text>
+                  <v-divider></v-divider>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" flat @click="helpDialog = false">
+                      Close
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-toolbar>
           </v-card>
 
@@ -123,7 +222,7 @@
           <!-- Bottom buttons -->
           <v-layout row class="fab-container" ma-3>
             <!-- submit button on uploading page -->
-            <v-btn v-if="uploadingPage" color="info" v-on:click="submitImg" :loading="uploading">
+            <v-btn v-if="uploadingPage" color="info" @click="submitImg" :loading="uploading">
               Submit
             </v-btn>
 
@@ -131,13 +230,13 @@
             <template v-else>
               <v-flex pa-0 shrink text-xs-left>
                 <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
-                  v-on:click="expand_all(true)"
+                  @click="expand_all(true)"
                 >
                   <v-icon class="hidden-sm-and-down">unfold_more</v-icon> Expand All
                 </v-btn>
 
                 <v-btn color="info" :small="$vuetify.breakpoint.smAndDown"
-                  v-on:click="expand_all(false)"
+                  @click="expand_all(false)"
                 >
                   <v-icon class="hidden-sm-and-down">unfold_less</v-icon> Collapse All
                 </v-btn>
@@ -183,6 +282,7 @@ export default {
       zipping: false,
       previewImg: { reportCard: undefined, on: false },
       progress: { data: 0, max: 0 },
+      helpDialog: false,
     };
   },
 
