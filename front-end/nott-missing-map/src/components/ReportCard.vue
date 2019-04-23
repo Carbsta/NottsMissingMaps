@@ -11,12 +11,15 @@
             content-class="segment-info-tooltip"
           >
             <template>
+              <v-layout @mousemove="onmousemove($event)">
+                <span>{{dynamicTooltip.segment.name}}: </span>
+              </v-layout>
               <v-layout row justify-space-between
                 v-for="oneClass in dynamicTooltip.segment.children"
                 :key="oneClass.name"
                 @mousemove="onmousemove($event)"
               >
-                <span class="mr-1">{{oneClass.name}}:</span>
+                <span class="mr-1 ml-2">{{oneClass.name}}:</span>
                 <span>{{oneClass.score.toFixed(2)}}</span>
               </v-layout>
             </template>
