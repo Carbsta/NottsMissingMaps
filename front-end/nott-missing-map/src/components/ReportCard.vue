@@ -4,8 +4,29 @@
       <v-card>
         <v-card-title primary-title>
           <!-- Image -->
+          <transition name="segment-info-tooltip">
+            <v-tooltip bottom
+              :position-x="dynamicTooltip.tweenedX"
+              :position-y="dynamicTooltip.tweenedY"
+              v-model="dynamicTooltip.show"
+            >
+              <template >
+                <v-layout row justify-space-between
+                  v-for="oneClass in dynamicTooltip.segment.children"
+                  :key="oneClass.name"
+                >
+                  <span class="mr-1">{{oneClass.name}}:</span>
+                  <span>{{oneClass.score.toFixed(2)}}</span>
+                </v-layout>
+              </template>
+            </v-tooltip>
+          </transition>
           <v-flex xs6 sm12 lg6 justify-start pa-1>
-            <div ref="container" justify-start>
+            <div ref="container" justify-start
+              @mousemove="onmousemove($event)"
+              @mouseover="dynamicTooltip.show = true"
+              @mouseout="/*dynamicTooltip.show = false*/"
+            >
               <img :src="imgUrl" ref = "i" class="comparison-image">
               <canvas ref = "c" class="with-mask"></canvas>
             </div>
@@ -103,7 +124,7 @@ import colors from 'vuetify/es5/util/colors';
 import kebabCase from 'lodash/kebabCase';
 import { stringify as json2yml } from 'json2yaml';
 import JSZip from 'jszip';
-
+import { TweenLite } from 'gsap/TweenMax';
 
 export default {
   name: 'ReportCard',
@@ -117,6 +138,14 @@ export default {
     return {
       show: false,
       zipping: false,
+      dynamicTooltip: {
+        x: -1,
+        y: -1,
+        tweenedX: -1,
+        tweenedY: -1,
+        show: false,
+        segment: { children: [] },
+      },
     };
   },
   methods: {
@@ -152,6 +181,32 @@ export default {
     onPreview() {
       this.previewImg.reportCard = this;
       this.previewImg.on = true;
+    },
+    onmousemove(e) {
+      // set tooltip position
+
+
+      const rect = e.target.getBoundingClientRect();
+      const x = e.clientX - rect.left; // x position within the element.
+      const y = e.clientY - rect.top; // y position within the element.
+
+      const segmentW = rect.width / this.slice.x;
+      const segmentH = rect.height / this.slice.y;
+
+      const segmentX = Math.floor(x / segmentW);
+      const segmentY = Math.floor(y / segmentH);
+
+      if (segmentX < 0 || segmentX >= this.slice.x
+        || segmentY < 0 || segmentY >= this.slice.y) return;
+
+      if (this.dynamicTooltip.segment.name
+        !== this.reportTree[segmentX + segmentY * this.slice.x].name) {
+        this.dynamicTooltip.segment = this
+          .reportTree[segmentX + segmentY * this.slice.x];
+        // console.log(segmentX, segmentY);
+        this.dynamicTooltip.x = rect.left + segmentW * (segmentX + 0.5);
+        this.dynamicTooltip.y = rect.top + segmentH * (segmentY + 1);
+      }
     },
   },
 
@@ -268,6 +323,17 @@ export default {
     },
   },
 
+  watch: {
+    'dynamicTooltip.x': function (newValue) {
+      if (this.tweenedX === -1) { this.tweenedX = newValue; return; }
+      TweenLite.to(this.$data.dynamicTooltip, 0.2, { tweenedX: newValue });
+    },
+    'dynamicTooltip.y': function (newValue) {
+      if (this.tweenedY === -1) { this.tweenedY = newValue; return; }
+      TweenLite.to(this.$data.dynamicTooltip, 0.2, { tweenedY: newValue });
+    },
+  },
+
   asyncComputed: {
     // The blob data of masked image. Used for bulk downloading
     downloadableBlobs() {
@@ -350,6 +416,10 @@ export default {
 .with-mask {
   width: 100%;
   height: 100%;
+}
+
+.segment-info-tooltip-enter-active, .segment-info-tooltip-leave-active {
+  transition: all 0.2s;
 }
 
 #full {
