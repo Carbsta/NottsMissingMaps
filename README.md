@@ -1,13 +1,12 @@
 # NottsMissingMaps
 The repository for UoN group 25, working on IBM's Missing Maps project.
 Our website can be used here: https://missingmaps.eu-gb.cf.appdomain.cloud/
-The development build of the website is deployed here: https://fortestbranchnott.eu-gb.mybluemix.net/ (Warning, build may be broken or contain bugs)
+If you want to mess around with work in progress features the development build of the website is deployed here: https://fortestbranchnott.eu-gb.mybluemix.net/ (Warning, build may be broken or contain bugs)
 
-The user manual can be found here: https://github.com/Carbsta/NottsMissingMaps/wiki/User-Manual
+We recommend checking out our wiki!
+https://github.com/Carbsta/NottsMissingMaps/wiki
 
-The documentation can be found here:
-
-The wiki also includes instructions on how to set up the project yourself, recreate our work and take it further.
+This includes a page for our user manual and our documentation which includes instructions on how to set up the project yourself, recreate our work and take it further.
 
 ## The Goal:
 To produce a web app that takes arial photography and shows areas of human habitation as well as a report allowing you to view confidence scores. Using IBM Cloud and IBM Watson Visual Recognition.
