@@ -11,7 +11,6 @@
   "dependencies": {
     "axios": "^0.18.0",
     "file-saver": "^2.0.1",
-    "gsap": "^2.1.2",
     "image-comparison": "^2.0.4",
     "jimp": "^0.6.1",
     "json2yaml": "^1.1.0",
